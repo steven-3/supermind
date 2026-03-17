@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__pencil",
+      "Bash(git*)",
+      "Bash(gh*)",
+      "Bash(cd*&&*git*)",
+      "Bash(cd*&&*gh*)"
+    ]
+  },
+  "enabledPlugins": {
+    "interface-design@interface-design": true,
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true
+  },
+  "extraKnownMarketplaces": {
+    "ui-ux-pro-max-skill": {
+      "source": {
+        "source": "github",
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
+  "voiceEnabled": true,
+  "skipDangerousModePermissionPrompt": true
+}
