@@ -66,7 +66,7 @@ description: Create AI-optimized ARCHITECTURE.md and DESIGN.md for a project via
 
 ### Process Flow
 
-The flow tracks which files need creation using two flags: `create_arch` and `create_design`. Steps 3-4 may resolve these flags early (via "keep" or "migrate"). Step 5 only acts on files whose flags are still unresolved.
+The flow tracks which files need creation using two flags: `create_arch` and `create_design`. Steps 4-5 may resolve these flags early (via "keep" or "migrate"). Step 7 only acts on files whose flags are still unresolved.
 
 ```
 1. Ask: "Does this project have a UI?" → yes/no
@@ -79,6 +79,7 @@ The flow tracks which files need creation using two flags: `create_arch` and `cr
       in package.json, pnpm-workspace.yaml, Cargo workspace):
       Ask: "This looks like a monorepo. Document the entire repo, or a specific subfolder?"
    → Sets: scan_root = chosen directory
+   c. If neither condition triggers: scan_root = working directory (repo root)
 
 3. Set flags: create_arch = true, create_design = needs_ui
 
@@ -87,7 +88,7 @@ The flow tracks which files need creation using two flags: `create_arch` and `cr
      → keep: create_arch = false (skip entirely)
      → migrate: Read existing file. Map content into template sections.
        Content that doesn't fit any section goes into a "Notes" section at the end.
-       Back up original to ARCHITECTURE.md.bak before overwriting.
+       Back up original to ARCHITECTURE.md.bak before overwriting (overwrite .bak if it already exists).
        create_arch = false (handled by migration)
    → missing: create_arch remains true
 
@@ -95,7 +96,7 @@ The flow tracks which files need creation using two flags: `create_arch` and `cr
    → exists: Ask "Keep as-is or migrate?"
      → keep: create_design = false
      → migrate: Same process as ARCHITECTURE.md migration.
-       Back up to DESIGN.md.bak. create_design = false
+       Back up to DESIGN.md.bak (overwrite .bak if it already exists). create_design = false
    → missing: create_design remains true
 
 6. If create_arch = false AND create_design = false: skip to step 8
@@ -115,8 +116,9 @@ The flow tracks which files need creation using two flags: `create_arch` and `cr
      - If create_design: fill DESIGN.md template from scan results
 
 8. Commit generated/migrated files with message:
-   "Initialize living documentation (ARCHITECTURE.md[, DESIGN.md])"
-   This is a standalone commit containing only the generated docs.
+   - New files: "Initialize living documentation (ARCHITECTURE.md[, DESIGN.md])"
+   - Migrated files: "Migrate living documentation to AI-optimized format (ARCHITECTURE.md[, DESIGN.md])"
+   This is a standalone commit containing only the generated/migrated docs (and .bak files if migrating).
    Committing is auto-approved per CLAUDE.md git permissions (non-destructive write).
 ```
 
@@ -216,7 +218,7 @@ User Request → middleware.ts → route handler → service → database
 
 ### `skills/living-docs/SKILL.md` — Edit
 
-This **replaces** the current "On Every Conversation Start" behavior (line 24: "offer to create it") with a redirect to `/living-docs:init`:
+This **replaces** the current "On Every Conversation Start" step 4 ("offer to create it") with a redirect to `/living-docs:init`:
 
 - Rename all `architecture.md` references to `ARCHITECTURE.md`
 - Always read `ARCHITECTURE.md` at conversation start (check for both `architecture.md` and `ARCHITECTURE.md`; if lowercase exists, rename to uppercase)
@@ -263,8 +265,6 @@ Same content as the template above, replacing the current Living Documentation s
 
 - `/living-docs` maintenance behavior (surgical edits, Edit tool, factual content) — unchanged
 - Worktree workflow, git permissions, MCP sections — unchanged
-- `README.md` — does not reference `architecture.md` in current version (verified)
-- `SETUP.md` — does not reference `architecture.md` in current version (verified)
 - No new dependencies or hooks
 
 ## Files Summary
@@ -277,4 +277,6 @@ Same content as the template above, replacing the current Living Documentation s
 | `skills/living-docs/SKILL.md` | **Edit** — conditional DESIGN.md, missing-file prompt, `architecture.md` → `ARCHITECTURE.md` rename |
 | `skills/init/SKILL.md` | **Edit** — add `/living-docs:init` at end of flow |
 | `templates/CLAUDE.md` | **Edit** — rewrite Living Documentation section |
-| `CLAUDE.md` | **Edit** — rewrite Living Documentation section |
+| `CLAUDE.md` | **Edit** — rewrite Living Documentation section + update Skill System section (line 10: `architecture.md` → `ARCHITECTURE.md`) |
+| `README.md` | **Edit** — `architecture.md` → `ARCHITECTURE.md` in Living Docs feature description |
+| `SETUP.md` | **Edit** — `architecture.md` → `ARCHITECTURE.md` in skills table |
