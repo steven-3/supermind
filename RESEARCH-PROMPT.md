@@ -1,265 +1,659 @@
-# Claude Code Optimal Setup: Deep Research & Analysis
+# Claude Code Optimal Setup: Multi-Agent Research System
 
-## Your Mission
+## Why Multi-Agent?
 
-You are conducting the definitive analysis of Claude Code enhancement systems to determine the absolute best setup for output quality, learning, memory persistence, and developer productivity. No shortcuts. No assumptions. Read actual source code and skill files — not just READMEs.
+Cramming 7 systems into one context window causes **context poisoning** — whatever Claude reads last biases its conclusions. The system that happens to be analyzed last gets unfairly favored due to recency bias, and attention degrades as context fills.
 
-## Phase 1: Deep System Analysis
+**Solution: Double-blind isolation.** Each system is analyzed by a separate agent in a clean context. They never see each other. A synthesis agent reads only their standardized outputs — never the raw source. No cross-contamination.
 
-### 1.1 — SuperClaude Framework
+---
+
+## Architecture
+
+```
+Phase 1: ISOLATED RESEARCH (7 parallel agents, clean context each)
+  ├── Agent 1: SuperClaude Framework → report-superclaude.md
+  ├── Agent 2: Superpowers → report-superpowers.md
+  ├── Agent 3: ECC → report-ecc.md
+  ├── Agent 4: Sequential Thinking → report-sequential-thinking.md
+  ├── Agent 5: claude-mem → report-claude-mem.md
+  ├── Agent 6: Serena → report-serena.md
+  └── Agent 7: Obsidian → report-obsidian.md
+
+Phase 2: COMPARISON AGENTS (3 agents, read only Phase 1 outputs)
+  ├── Agent 8: Skill Quality Showdown (reads reports 1-3) → comparison-skills.md
+  ├── Agent 9: Memory & Persistence (reads reports 3,5,6,7) → comparison-memory.md
+  └── Agent 10: Agent Architecture (reads reports 1-3) → comparison-agents.md
+
+Phase 3: SYNTHESIS (1 agent, reads only Phase 2 outputs + Phase 1 summaries)
+  └── Agent 11: Final Verdict → OPTIMAL-SETUP-REPORT.md
+```
+
+All intermediate reports go in `E:/Projects/claude-setup/research/`
+
+---
+
+## How to Run This
+
+You are the **orchestrator**. You do NOT research anything yourself. You dispatch agents and collect their outputs. Follow this exact sequence:
+
+### Step 0: Setup
+```
+mkdir -p E:/Projects/claude-setup/research
+```
+
+### Step 1: Dispatch Phase 1 Agents (ALL IN PARALLEL)
+
+Launch all 7 agents simultaneously using the Agent tool. Each agent runs in isolation with a clean context. Use `run_in_background: true` for all of them so they execute concurrently.
+
+**IMPORTANT:** Each agent prompt below is self-contained. Copy the FULL prompt for each agent. Do not summarize or abbreviate.
+
+---
+
+## Phase 1 Agent Prompts
+
+### AGENT 1: SuperClaude Framework Analyst
+
+```
+You are analyzing the SuperClaude Framework in complete isolation. You have NO knowledge of competing systems. Your job is to produce an honest, evidence-based assessment.
+
 **Repo:** https://github.com/SuperClaude-Org/SuperClaude_Framework
 
-Research EVERY aspect:
-- Clone or fetch the repo. Read the actual command/skill files, not just the README
-- For EACH of the 30 slash commands: read the full `.md` file, assess depth (line count, specificity, enforcement mechanisms, examples)
-- For EACH of the 16 agents: what domain expertise do they encode? How are they activated? How deep are their instructions?
-- The 7 behavioral modes: how do they work? What triggers mode switching? How do they affect Claude's behavior?
-- Architecture: How do PLANNING.md, TASK.md, KNOWLEDGE.md work? What gets injected into context and when?
-- MCP integration: How does SuperClaude coordinate with MCP servers? What's the `select-tool` intelligence?
-- Session management: Does it persist anything across sessions? How?
-- Token efficiency: How much context do the 30 commands consume? Are they loaded on-demand or all at once?
-- Auto-trigger: Is there ANY automatic activation, or is everything manual `/sc:*` invocation?
+## Research Steps
 
-**Key files to read (at minimum):**
-- Every file in the commands directory
-- Agent definitions
-- The installer/framework core
-- Any hooks or session management code
+1. Fetch the repo README for overview, then fetch the actual source files
+2. Find and read EVERY command/skill markdown file (there are reportedly 30 slash commands)
+3. Find and read EVERY agent definition (reportedly 16 agents)
+4. Find and read the behavioral mode system (reportedly 7 modes)
+5. Understand the architecture: PLANNING.md, TASK.md, KNOWLEDGE.md injection
+6. Find any hooks, session management, or persistence code
+7. Find the MCP integration / select-tool system
 
-### 1.2 — Superpowers
+## For Each Command/Skill File, Record:
+- File path and name
+- Line count
+- PURPOSE: What does it do? (1-2 sentences)
+- DEPTH SCORE (1-5): 1=generic template, 5=deep operating manual with enforcement
+- ENFORCEMENT: Does it have mandatory gates? Anti-rationalization? Red flags? Or just suggestions?
+- EXAMPLES: Does it include real, specific examples or just generic placeholders?
+- SUPPORTING FILES: Does it reference additional docs/techniques?
+- Quote the 2-3 most important paragraphs verbatim
+
+## Assess These Capabilities In Detail:
+For each, quote the actual content and rate depth 1-5:
+- **Debugging/Troubleshooting**: How deep is the methodology?
+- **TDD/Testing**: How is it enforced?
+- **Planning/Design**: How structured is the workflow?
+- **Code Review**: How rigorous?
+- **Implementation/Execution**: How does it coordinate work?
+- **Brainstorming/Ideation**: How does it explore ideas?
+
+## Architecture Assessment:
+- How are commands loaded? All at once or on-demand?
+- Estimated token overhead of having SuperClaude active
+- Is there ANY auto-triggering, or 100% manual invocation?
+- Session persistence: what survives between conversations?
+- MCP coordination: how does select-tool work?
+
+## Agent System Assessment:
+- For each of the 16 agents: name, domain, activation method, prompt depth
+- How are agents dispatched? Manually or automatically?
+- Do agents coordinate with each other?
+
+## Output Format
+
+Save your complete analysis to: E:/Projects/claude-setup/research/report-superclaude.md
+
+Structure it EXACTLY as:
+
+# SuperClaude Framework Analysis
+
+## Executive Summary
+(3-5 sentences: what this system IS, its philosophy, its strongest/weakest points)
+
+## Command Inventory
+(Table: name | line count | depth score 1-5 | enforcement type | brief description)
+
+## Agent Inventory
+(Table: name | domain | activation | depth score | brief description)
+
+## Core Capability Deep-Dives
+### Debugging
+(Quote key content, rate depth, describe enforcement)
+### TDD
+(same)
+### Planning
+(same)
+### Code Review
+(same)
+### Implementation
+(same)
+### Brainstorming
+(same)
+
+## Architecture
+(Context injection, token overhead, auto-trigger, session persistence)
+
+## Unique Strengths
+(What does this system do that others might not?)
+
+## Honest Weaknesses
+(Where does it fall short? Be specific.)
+
+## Raw Evidence
+(Key quotes from actual files, with file paths)
+```
+
+### AGENT 2: Superpowers Analyst
+
+```
+You are analyzing the Superpowers plugin in complete isolation. You have NO knowledge of competing systems. Your job is to produce an honest, evidence-based assessment.
+
 **Repo:** https://github.com/obra/superpowers
 
-Research EVERY aspect:
-- Read ALL skill SKILL.md files in the `skills/` directory — these are the core of the system
-- For EACH skill: assess depth, enforcement mechanisms, anti-pattern detection, red flags, supporting docs
-- The auto-trigger system: Read `skills/using-superpowers/SKILL.md` completely. How does it decide which skill to fire? What's the decision tree? How aggressive is it?
-- Subagent-driven development: Read `skills/subagent-driven-development/SKILL.md` AND all supporting files (implementer-prompt.md, spec-reviewer-prompt.md, code-quality-reviewer-prompt.md). How does the two-stage review work?
-- Systematic debugging: Read the main SKILL.md AND all supporting files (root-cause-tracing.md, defense-in-depth.md, condition-based-waiting.md). How deep is the methodology?
-- TDD enforcement: Read `skills/test-driven-development/SKILL.md` AND testing-anti-patterns.md. How is RED-GREEN-REFACTOR enforced?
-- Brainstorming: Read the full skill including visual-companion.md and spec-document-reviewer-prompt.md
-- Writing plans: Read SKILL.md and plan-document-reviewer-prompt.md
-- Code review: Both requesting and receiving skills — how do they enforce rigor?
-- Verification before completion: What gates exist?
-- Git worktrees: How does isolation work?
-- Dispatching parallel agents: How does it decide what to parallelize?
-- Finishing a development branch: What's the decision tree?
-- Writing skills: How does it create new skills?
+## Research Steps
 
-**Assess the ENFORCEMENT model:**
-- How does Superpowers prevent Claude from skipping steps?
-- What anti-rationalization mechanisms exist?
-- How are "red flags" used to catch Claude cutting corners?
-- Is it truly mandatory or just suggestive?
+1. Fetch the repo README for overview
+2. Find and read EVERY SKILL.md file in the skills/ directory
+3. For each skill, ALSO read every supporting file in that skill's directory
+4. Pay special attention to the auto-trigger system (using-superpowers/SKILL.md)
+5. Deep-dive into the subagent-driven-development system (all supporting prompts)
+6. Deep-dive into systematic-debugging (all supporting technique files)
+7. Deep-dive into test-driven-development (including anti-patterns)
+8. Read the brainstorming skill completely (including visual-companion, spec-reviewer)
+9. Read writing-plans (including plan-document-reviewer)
+10. Read both code review skills (requesting + receiving)
 
-### 1.3 — Everything Claude Code (ECC)
+## For Each Skill, Record:
+- File path
+- Total line count (SKILL.md + all supporting files)
+- PURPOSE: What does it do? (1-2 sentences)
+- DEPTH SCORE (1-5): 1=generic, 5=deep with enforcement
+- ENFORCEMENT MECHANISMS: List every mandatory gate, anti-rationalization table, red flag list
+- ANTI-PATTERNS: What does it explicitly prevent Claude from doing?
+- SUPPORTING FILES: List every additional doc it references
+- Quote the 3-5 most critical paragraphs verbatim (the ones that enforce behavior)
+
+## Assess These Capabilities In Detail:
+For each, quote actual content and rate depth 1-5:
+- **Debugging**: Full methodology, all 4 phases, supporting techniques
+- **TDD**: RED-GREEN-REFACTOR enforcement, anti-patterns
+- **Planning**: How specs are written, reviewed, approved
+- **Code Review**: Both requesting and receiving — how is rigor enforced?
+- **Implementation**: Subagent-driven dev — the two-stage review system
+- **Brainstorming**: The design exploration flow
+
+## Auto-Trigger Assessment:
+- Read using-superpowers/SKILL.md completely
+- How does it decide which skill fires?
+- What's the decision tree?
+- The "Red Flags" table — what rationalizations does it catch?
+- How aggressive is it? (does it over-fire or miss?)
+
+## Subagent System Assessment:
+- Read all prompts: implementer-prompt.md, spec-reviewer-prompt.md, code-quality-reviewer-prompt.md
+- How does two-stage review work?
+- How are subagents dispatched?
+- What context do subagents receive?
+
+## Output Format
+
+Save to: E:/Projects/claude-setup/research/report-superpowers.md
+
+Structure EXACTLY as:
+
+# Superpowers Analysis
+
+## Executive Summary
+(3-5 sentences)
+
+## Skill Inventory
+(Table: name | total lines (with supporting files) | depth score | enforcement type | brief description)
+
+## Core Capability Deep-Dives
+### Debugging
+(Quote key enforcement content, rate depth, list all supporting files and their content)
+### TDD
+(same)
+### Planning
+(same)
+### Code Review
+(same)
+### Implementation / Subagent System
+(same — include two-stage review details)
+### Brainstorming
+(same)
+
+## Auto-Trigger System
+(How using-superpowers works, decision tree, red flags table, effectiveness)
+
+## Enforcement Model
+(How does it prevent Claude from cutting corners? Quote the mechanisms.)
+
+## Unique Strengths
+(What does this system do that others might not?)
+
+## Honest Weaknesses
+(Where does it fall short?)
+
+## Raw Evidence
+(Key quotes with file paths)
+```
+
+### AGENT 3: ECC Analyst
+
+```
+You are analyzing Everything Claude Code (ECC) in complete isolation. You have NO knowledge of competing systems. Your job is to produce an honest, evidence-based assessment.
+
 **Repo:** https://github.com/affaan-m/everything-claude-code
 
-Research EVERY aspect:
-- Read the CORE skills that overlap with Superpowers: debugging/troubleshooting, TDD, code review, planning, brainstorming equivalents. Compare depth and enforcement quality line-by-line
-- ALL 57 commands: read actual command files, assess depth vs. surface-level templates
-- ALL 13+ agents: read agent definitions, compare to SuperClaude's 16 agents and Superpowers' subagent system
-- The continuous learning system IN DETAIL:
-  - How does instinct extraction actually work? Read the code
-  - What triggers `/learn-eval`? What does it analyze?
-  - How are confidence scores calculated?
-  - How does `/evolve` cluster instincts into skills? Read the implementation
-  - Where are instincts stored? What format?
-  - Does this actually produce useful patterns, or is it theater?
-- Session persistence IN DETAIL:
-  - Read `session-start.js`, `session-end.js`, `suggest-compact.js`, `evaluate-session.js`
-  - What exactly gets saved? What gets loaded?
-  - How does context injection work at session start?
-  - What's the failure mode when hooks don't fire?
-- Hook architecture:
-  - Read hooks.json and all hook scripts
-  - PreToolUse, PostToolUse, Stop — what happens at each stage?
-  - How do ECC_HOOK_PROFILE levels (minimal/standard/strict) differ?
-  - What's the performance overhead per tool call?
-- Multi-language rules: Read the TypeScript, Python, Go rules. How deep are they?
-- Security scanning: How does AgentShield integration work? Read the 102 rules
-- Business skills: Are investor-materials, fundraising, content-engine actually useful or filler?
+## Research Steps
 
-**Critical quality assessment:**
-- Pick ECC's 5 most important skills (debugging, TDD, planning, code review, implementation)
-- Read them completely
-- Compare their depth, specificity, and enforcement to Superpowers' equivalents
-- Are they deep operating manuals or surface-level templates?
+1. Fetch the repo README and understand the full system
+2. Find and read the 5 CORE command files: debugging/troubleshooting, TDD, code review, planning, implementation
+3. Sample 10 additional command files across different domains to assess quality distribution
+4. Find and read ALL agent definition files (reportedly 13+)
+5. Deep-dive into the continuous learning system:
+   - Find instinct extraction code/commands
+   - Find /learn-eval implementation
+   - Find /evolve implementation
+   - Find confidence scoring logic
+   - Find instinct storage format
+6. Deep-dive into session persistence:
+   - Find and read session-start.js, session-end.js, suggest-compact.js, evaluate-session.js
+   - Find hooks.json configuration
+   - Understand the 3-phase lifecycle
+7. Read the hook architecture: PreToolUse, PostToolUse, Stop triggers
+8. Sample language-specific rules (TypeScript, Python)
+9. Check security scanning / AgentShield integration
 
-### 1.4 — Sequential Thinking MCP Server
+## For Each Core Command (debugging, TDD, code review, planning, implementation):
+- File path and line count
+- DEPTH SCORE (1-5): 1=generic template, 5=deep operating manual
+- ENFORCEMENT: Mandatory gates? Anti-rationalization? Or just suggestions?
+- Quote the 2-3 most important paragraphs verbatim
+- Honestly assess: is this a deep methodology or a surface-level template?
+
+## For The 10 Sampled Additional Commands:
+- Same assessment — are they deep or shallow?
+- What's the quality distribution? (mostly deep, mostly shallow, mixed?)
+
+## Continuous Learning Deep-Dive:
+- How does instinct extraction ACTUALLY work? (quote the code/prompts)
+- What triggers it? Manual command or automatic?
+- Confidence scoring: is it real quantitative scoring or just labels?
+- /evolve: does it actually cluster instincts into skills? How?
+- Storage: what does an instinct file look like? Quote an example if available
+- HONEST ASSESSMENT: Is this genuine machine learning or prompt-driven summarization dressed up as learning?
+
+## Session Persistence Deep-Dive:
+- What exactly gets saved at session end? Quote the save logic
+- What gets loaded at session start? Quote the load logic
+- What happens when hooks fail to fire?
+- Token cost of loading session context
+- Does compaction actually work? How?
+
+## Hook System:
+- What fires on PreToolUse? Performance overhead?
+- What fires on PostToolUse?
+- Minimal vs. standard vs. strict profiles — concrete differences
+
+## Output Format
+
+Save to: E:/Projects/claude-setup/research/report-ecc.md
+
+Structure EXACTLY as:
+
+# Everything Claude Code Analysis
+
+## Executive Summary
+(3-5 sentences)
+
+## Core Command Quality
+(Table: name | lines | depth score | enforcement | honest assessment)
+
+## Sampled Command Quality
+(Table of 10 sampled commands — same format. State the quality distribution.)
+
+## Agent Inventory
+(Table: name | domain | activation | depth score)
+
+## Continuous Learning System
+### How It Works (with code quotes)
+### Instinct Extraction Quality
+### Evolution Mechanism
+### Honest Assessment: Real Learning or Theater?
+
+## Session Persistence
+### Save Phase (with code quotes)
+### Load Phase (with code quotes)
+### Failure Modes
+### Token Cost
+
+## Hook Architecture
+### What Fires When
+### Performance Overhead
+### Profile Differences
+
+## Unique Strengths
+## Honest Weaknesses
+## Raw Evidence
+```
+
+### AGENT 4: Sequential Thinking Analyst
+
+```
+You are analyzing the Sequential Thinking MCP Server in isolation.
+
 **Repo:** https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking
 
-Research:
-- Read the source code completely (it's small)
-- How does it structure multi-step reasoning?
-- What's the tool interface — what parameters, what returns?
-- How does it handle thought revision and branching?
-- What types of problems benefit from it vs. Claude's native reasoning?
-- How does it compare to Claude's extended thinking / `alwaysThinkingEnabled`?
-- Can it be combined with the skill systems above? How?
-- Real-world usage patterns — when does it actually help vs. add overhead?
+## Research Steps
+1. Read the complete source code (it should be small)
+2. Understand the MCP tool interface — parameters, returns
+3. How does thought revision and branching work?
+4. What problem types benefit from this vs. native Claude reasoning?
 
-### 1.5 — Memory System: claude-mem
+## Output Format
+Save to: E:/Projects/claude-setup/research/report-sequential-thinking.md
+
+Include:
+- How it works (with code quotes)
+- Tool interface specification
+- Thought revision/branching mechanism
+- When it helps vs. adds overhead
+- How it could integrate with skill systems
+- Comparison to Claude's built-in extended thinking
+```
+
+### AGENT 5: claude-mem Analyst
+
+```
+You are analyzing claude-mem in isolation.
+
 **Repo:** https://github.com/thedotmack/claude-mem
 
-Research:
-- Read the full source code
-- What does it persist? (conversations, patterns, user preferences, project context?)
-- Storage backend — where does data live?
-- How does it inject memory into Claude's context?
-- Retrieval mechanism — semantic search? Keyword? Recency-based?
-- Token cost of memory injection per conversation
-- How does it compare to Claude Code's built-in memory system (`~/.claude/projects/*/memory/`)?
-- Can it work alongside ECC's instinct system?
+## Research Steps
+1. Read the full source code
+2. What does it persist? How?
+3. Storage backend and format
+4. Context injection mechanism
+5. Retrieval: semantic search, keyword, or recency?
+6. Token cost per conversation
 
-### 1.6 — Memory System: Serena
+## Output Format
+Save to: E:/Projects/claude-setup/research/report-claude-mem.md
+
+Include:
+- Architecture (with code quotes)
+- What survives session restarts
+- What survives across projects
+- Retrieval mechanism details
+- Token overhead
+- Comparison to Claude Code's built-in memory (~/.claude/projects/*/memory/)
+- Honest assessment: is this better than the built-in system?
+```
+
+### AGENT 6: Serena Analyst
+
+```
+You are analyzing Serena in isolation.
+
 **Repo:** https://github.com/oraios/serena
 
-Research:
-- Read the full documentation and source
-- Semantic code analysis: how does it build understanding of a codebase?
-- Memory/persistence: what does Serena remember across sessions?
-- Symbol-level editing: how does this compare to Claude Code's native Edit tool?
-- How does it integrate as an MCP server?
-- What's the actual value-add over Claude Code's native code understanding?
-- SuperClaude uses Serena for cross-session persistence — how does that integration work?
-- Can Serena serve as a memory backbone for any of the skill systems?
+## Research Steps
+1. Read documentation and key source files
+2. Semantic code analysis — how does it build codebase understanding?
+3. Memory/persistence — what does Serena remember across sessions?
+4. Symbol-level editing — how does it compare to Claude's Edit tool?
+5. MCP server integration — what tools does it expose?
 
-### 1.7 — Knowledge System: Obsidian
+## Output Format
+Save to: E:/Projects/claude-setup/research/report-serena.md
+
+Include:
+- Architecture and capabilities
+- What it persists across sessions
+- Tools exposed via MCP
+- Value-add over Claude Code's native capabilities
+- How it could serve as a memory backbone
+```
+
+### AGENT 7: Obsidian Analyst
+
+```
+You are analyzing Obsidian as a knowledge system for Claude Code.
+
 **Website:** https://obsidian.md/
 
-Research:
-- How can Obsidian serve as an external knowledge base for Claude Code?
-- Are there Obsidian MCP servers? (search for obsidian-mcp, obsidian-claude, etc.)
-- How would a vault of notes/docs/patterns integrate into Claude's context?
-- Could Obsidian replace or enhance ECC's instinct storage?
-- Could it serve as a cross-project knowledge base that Claude reads from?
-- What's the retrieval mechanism — does Claude search the vault, or is content injected?
-- Practical setup: what would an Obsidian-backed memory system look like?
+## Research Steps
+1. Search the web for: "obsidian mcp server", "obsidian claude code", "obsidian ai integration"
+2. Find any MCP servers that connect Obsidian to Claude
+3. Assess how a vault of notes could serve as Claude's knowledge base
+4. Search for: how other developers use Obsidian with AI coding assistants
+
+## Output Format
+Save to: E:/Projects/claude-setup/research/report-obsidian.md
+
+Include:
+- Available MCP servers/integrations
+- How vault content would be injected into Claude's context
+- Retrieval mechanisms (search, backlinks, tags)
+- Practical setup for a developer knowledge base
+- Could it replace or enhance other memory systems?
+```
 
 ---
 
-## Phase 2: Head-to-Head Comparisons
+## Phase 2: Comparison Agents (dispatch AFTER Phase 1 completes)
 
-### 2.1 — Skill Quality Showdown
+Wait for ALL Phase 1 agents to complete. Then dispatch these 3 agents in parallel.
 
-For EACH of these 6 core capabilities, read the actual implementation from all three systems and compare:
+### AGENT 8: Skill Quality Showdown
 
-| Capability | Superpowers Skill | SuperClaude Command | ECC Equivalent |
-|---|---|---|---|
-| **Debugging** | systematic-debugging | /sc:troubleshoot | troubleshoot/build-fix agent |
-| **TDD** | test-driven-development | /sc:test | /tdd command |
-| **Planning** | writing-plans | /sc:brainstorm + /sc:workflow | /plan + /multi-plan |
-| **Code Review** | requesting-code-review + receiving-code-review | /sc:analyze | /code-review |
-| **Implementation** | executing-plans + subagent-driven-development | /sc:implement | /orchestrate + /multi-execute |
-| **Brainstorming** | brainstorming | /sc:brainstorm | /plan |
+```
+You are a neutral judge comparing three Claude Code enhancement systems. You have NOT read any of their source code — you are working ONLY from standardized analyst reports to avoid bias.
 
-For each row, assess:
-- **Depth**: Line count, specificity of instructions, real examples vs. generic
-- **Enforcement**: Mandatory gates vs. suggestions. Anti-rationalization mechanisms
-- **Supporting materials**: Additional docs, techniques, sub-skills referenced
-- **Actionability**: Does Claude know exactly what to do, or is it vague guidance?
-- **Anti-patterns**: Does it catch Claude cutting corners? How?
+Read these three files:
+- E:/Projects/claude-setup/research/report-superclaude.md
+- E:/Projects/claude-setup/research/report-superpowers.md
+- E:/Projects/claude-setup/research/report-ecc.md
 
-### 2.2 — Architecture & Integration
+## Your Task
 
-Compare how each system integrates with Claude Code:
-- Context injection model (what goes into the system prompt, when, how much)
-- Token overhead per conversation (idle cost of having the system loaded)
-- Tool coordination (how they use/manage MCP servers)
-- File system footprint (what they install where)
-- Conflict potential (can they coexist? What breaks?)
+For each of these 6 capabilities, determine the winner based on EVIDENCE from the reports:
 
-### 2.3 — Agent & Subagent Systems
+1. **Debugging**: Which system has the deepest, most enforced debugging methodology?
+2. **TDD**: Which system best enforces test-driven development?
+3. **Planning**: Which system produces the best design/planning workflow?
+4. **Code Review**: Which system has the most rigorous code review process?
+5. **Implementation**: Which system best coordinates actual code execution?
+6. **Brainstorming**: Which system best explores ideas before building?
 
-Compare agent architectures:
-- SuperClaude's 16 domain agents vs. ECC's 13 agents vs. Superpowers' subagent-driven-development
-- How are agents dispatched? Manual vs. automatic?
-- Agent prompt quality: read actual agent prompts from all three
-- Two-stage review (Superpowers) vs. single-pass (others)
-- Parallel execution capabilities
+For each capability:
+- Quote the depth scores from each report
+- Quote the enforcement mechanisms from each report
+- Quote key evidence passages
+- Declare a winner with specific reasoning
+- Note any capability where the winner is close or contested
 
-### 2.4 — Memory & Persistence
+Also assess:
+7. **Auto-trigger / Activation**: Which system activates most intelligently?
+8. **Token Efficiency**: Which system costs the least context overhead?
+9. **Agent Quality**: Which system has the best agent/subagent architecture?
 
-Compare all memory approaches:
-- Claude Code built-in memory (`~/.claude/projects/*/memory/MEMORY.md`)
-- ECC's 3-phase session persistence (load → compact → save)
-- ECC's instinct extraction and evolution
-- Serena's cross-session code understanding
-- claude-mem's conversation memory
-- Obsidian as external knowledge base
-- SuperClaude's PLANNING.md/TASK.md/KNOWLEDGE.md approach
+Save to: E:/Projects/claude-setup/research/comparison-skills.md
+```
 
-For each: what survives a session restart? What survives across projects? What improves over time?
+### AGENT 9: Memory & Persistence Comparison
 
-### 2.5 — Learning Systems
+```
+You are a neutral judge comparing memory and persistence systems for Claude Code. You are working ONLY from analyst reports.
 
-- ECC's instinct extraction: does it actually produce reusable patterns? Read examples if available
-- SuperClaude's case-based research memory: how does it learn from past searches?
-- Superpowers: no learning system — what's the actual cost of this gap?
-- Sequential thinking: does structured reasoning improve over a session?
-- claude-mem: does it learn user patterns or just store conversations?
+Read these files:
+- E:/Projects/claude-setup/research/report-ecc.md (session persistence + continuous learning sections)
+- E:/Projects/claude-setup/research/report-claude-mem.md
+- E:/Projects/claude-setup/research/report-serena.md
+- E:/Projects/claude-setup/research/report-obsidian.md
+- E:/Projects/claude-setup/research/report-sequential-thinking.md
+
+Also consider Claude Code's built-in memory system (~/.claude/projects/*/memory/MEMORY.md).
+
+## Your Task
+
+Compare ALL memory/persistence approaches across these dimensions:
+
+| Dimension | Built-in Memory | ECC Persistence | ECC Learning | claude-mem | Serena | Obsidian |
+|---|---|---|---|---|---|---|
+| What survives session restart? | | | | | | |
+| What survives across projects? | | | | | | |
+| What improves over time? | | | | | | |
+| Token cost per session | | | | | | |
+| Setup complexity | | | | | | |
+| Reliability (what if it fails?) | | | | | | |
+
+For each system:
+- Is the persistence mechanism real and robust, or fragile?
+- Does the learning actually produce value, or is it theater?
+- What's the token overhead?
+- Can it be combined with others?
+
+Declare:
+- Best session persistence system (with evidence)
+- Best cross-session learning system (with evidence)
+- Best knowledge management system (with evidence)
+- Recommended memory architecture (which systems to combine and how)
+
+Save to: E:/Projects/claude-setup/research/comparison-memory.md
+```
+
+### AGENT 10: Agent Architecture Comparison
+
+```
+You are a neutral judge comparing agent/subagent architectures. Working ONLY from reports.
+
+Read:
+- E:/Projects/claude-setup/research/report-superclaude.md (agent sections)
+- E:/Projects/claude-setup/research/report-superpowers.md (subagent sections)
+- E:/Projects/claude-setup/research/report-ecc.md (agent sections)
+
+## Your Task
+
+Compare:
+1. Agent count and domain coverage
+2. Agent prompt quality (based on depth scores and evidence)
+3. Dispatch mechanism (manual vs. automatic)
+4. Multi-agent coordination
+5. Subagent isolation (do agents get clean context?)
+6. Review systems (two-stage vs. single-pass)
+7. Parallel execution capabilities
+
+Declare the best agent architecture with evidence.
+
+Save to: E:/Projects/claude-setup/research/comparison-agents.md
+```
 
 ---
 
-## Phase 3: Synthesis & Recommendation
+## Phase 3: Final Synthesis (dispatch AFTER Phase 2 completes)
 
-### 3.1 — Best-of-Breed Selection
+### AGENT 11: Synthesis & Final Report
 
-For each capability, declare a winner with evidence:
-- Best debugging methodology (with quotes from actual skill content)
-- Best TDD enforcement
-- Best planning/design workflow
-- Best code review process
-- Best implementation/execution system
-- Best brainstorming/ideation flow
-- Best agent/subagent architecture
-- Best memory/persistence system
-- Best cross-session learning
-- Best MCP server coordination
-- Best auto-trigger/activation system
-- Best token efficiency
+```
+You are producing the definitive recommendation for the optimal Claude Code setup. You have NOT read any source code — you are working ONLY from comparison reports and analyst summaries to ensure unbiased synthesis.
 
-### 3.2 — Optimal Setup Architecture
+Read ALL of these:
+- E:/Projects/claude-setup/research/comparison-skills.md
+- E:/Projects/claude-setup/research/comparison-memory.md
+- E:/Projects/claude-setup/research/comparison-agents.md
+- E:/Projects/claude-setup/research/report-superclaude.md (Executive Summary + Unique Strengths + Weaknesses only)
+- E:/Projects/claude-setup/research/report-superpowers.md (Executive Summary + Unique Strengths + Weaknesses only)
+- E:/Projects/claude-setup/research/report-ecc.md (Executive Summary + Unique Strengths + Weaknesses only)
+- E:/Projects/claude-setup/research/report-sequential-thinking.md
+- E:/Projects/claude-setup/research/report-claude-mem.md (Executive Summary only)
+- E:/Projects/claude-setup/research/report-serena.md (Executive Summary only)
+- E:/Projects/claude-setup/research/report-obsidian.md (Executive Summary only)
 
-Design the ideal Claude Code setup:
-- Which system(s) to install as the base
-- Which components to cherry-pick from others
-- How memory/persistence should work
-- How MCP servers should be configured
-- What the auto-trigger flow looks like
-- What the session lifecycle looks like (start → work → end → next session)
-- File/directory layout
+## Produce the Final Report
 
-### 3.3 — Conflict Resolution
+Save to: E:/Projects/claude-setup/OPTIMAL-SETUP-REPORT.md
 
+### Required Sections:
+
+# The Optimal Claude Code Setup
+
+## 1. Executive Summary
+The recommended setup in 3-5 sentences. What to install, what to skip, why.
+
+## 2. System Scores
+Rate each system 1-10 with justification:
+
+| System | Skill Depth | Enforcement | Breadth | Learning | Persistence | Token Efficiency | Ease of Use | Agent Quality | OVERALL |
+|---|---|---|---|---|---|---|---|---|---|
+| SuperClaude | | | | | | | | | |
+| Superpowers | | | | | | | | | |
+| ECC | | | | | | | | | |
+
+## 3. Capability Winners
+For each capability, the winner with 1-sentence evidence:
+- Debugging:
+- TDD:
+- Planning:
+- Code Review:
+- Implementation:
+- Brainstorming:
+- Auto-trigger:
+- Memory/Persistence:
+- Learning:
+- Agent Architecture:
+- Token Efficiency:
+- MCP Coordination:
+
+## 4. Recommended Setup
+Exact specification:
+- Base system(s) to install
+- Components to cherry-pick from others
+- Components to explicitly disable/skip
+- MCP servers to include
+- Memory system architecture
+
+## 5. Memory Architecture
+How persistence and learning should work:
+- What stores what
+- Session lifecycle (start → work → end → next session)
+- Cross-project knowledge flow
+- What tools/MCP servers support this
+
+## 6. MCP Server Configuration
+Which servers to run, through what (AIRIS gateway or direct), and why:
+- Sequential thinking: when to use
+- Serena: what it adds
+- Others: keep or drop
+
+## 7. What to Skip
+Components from each system that add overhead without value. Be specific and evidence-based.
+
+## 8. Conflict Resolution
 If recommending components from multiple systems:
-- What conflicts arise?
-- How to resolve them (disable overlapping features, merge configs, etc.)
-- Priority order when skills/commands compete
+- What conflicts exist
+- How to resolve each one
+- Priority order
 
-### 3.4 — The Report
+## 9. Setup Instructions
+Step-by-step installation for the recommended setup. Specific enough that someone could follow them blindly.
 
-Produce a final report as a markdown file with:
-
-1. **Executive Summary** — The recommended setup in 3-5 sentences
-2. **System Scores** — Rate each system 1-10 on: skill depth, enforcement, breadth, learning, persistence, token efficiency, ease of use, agent quality
-3. **Capability Matrix** — Winner for each capability with evidence
-4. **Recommended Setup** — Exact installation steps, configuration, what to enable/disable
-5. **Memory Architecture** — How persistence and learning should work
-6. **MCP Server Configuration** — Which servers, how they integrate
-7. **What to Skip** — Components that add overhead without value, with reasoning
-8. **Migration Path** — How to transition from current setup to recommended setup
-
-Save the report to: `E:/Projects/claude-setup/OPTIMAL-SETUP-REPORT.md`
+## 10. The Evidence Trail
+For each major recommendation, link back to the comparison report and specific evidence that supports it. No unsupported claims.
+```
 
 ---
 
-## Rules for This Research
+## Orchestrator Rules
 
-1. **Read actual source code and skill files.** Do not summarize from READMEs alone. The quality difference between systems is in the implementation details, not the marketing.
-2. **Quote specific evidence.** When declaring a winner, cite the actual content that makes it better.
-3. **Be brutally honest.** If a system's feature is theater (looks good but doesn't work), say so. If a simpler approach beats a complex one, say so.
-4. **Test claims.** If ECC claims "108+ skills," check if they're 108 deep skills or 108 template stubs. If Superpowers claims "mandatory enforcement," verify the mechanism exists.
-5. **Consider token economics.** A system that burns 50K tokens on overhead per conversation is worse than one that uses 5K, all else being equal.
-6. **No loyalty.** The best setup might be one system, two systems combined, or cherry-picked components from all three plus memory tools. Follow the evidence.
-7. **Practical over theoretical.** "This could work in theory" is not evidence. "This is how it actually works in the code" is.
+1. **Never research anything yourself.** You only dispatch agents and collect outputs.
+2. **Phase 1 agents run in parallel.** All 7 at once using `run_in_background: true`.
+3. **Wait for ALL Phase 1 to complete before starting Phase 2.**
+4. **Phase 2 agents run in parallel.** All 3 at once.
+5. **Wait for ALL Phase 2 to complete before starting Phase 3.**
+6. **Phase 3 is a single agent.** It reads everything and produces the final report.
+7. **After Phase 3 completes**, read the final report and present a summary to the user.
+8. **If any agent fails**, re-dispatch it once. If it fails again, note the gap in the final synthesis.
