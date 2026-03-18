@@ -249,7 +249,7 @@ Merged responsibility — session context + living docs:
    - The Overview section (first paragraph)
    - The Tech Stack table
    - Section headings only for remaining sections (as a table of contents)
-   - Truncate to ~200 tokens max for ARCHITECTURE.md portion
+   - Truncate to ~200 tokens max for ARCHITECTURE.md portion (priority order: Overview paragraph first, then Tech Stack table, then section headings — truncate lowest priority first if over budget)
 4. Check for `DESIGN.md` in project root — if exists, read and extract:
    - The Overview section
    - Section headings only
@@ -476,14 +476,16 @@ The repo's own CLAUDE.md includes:
   "version": "2.0.0",
   "description": "Complete, opinionated Claude Code setup — hooks, skills, status line, MCP servers, and living documentation",
   "bin": {
-    "supermind-claude": "./cli/index.js"
+    "supermind-claude": "./cli/index.js",
+    "supermind": "./cli/index.js"
   },
   "files": [
     "cli/",
     "hooks/",
     "skills/",
     "templates/",
-    "airis/"
+    "airis/",
+    ".env.example"
   ],
   "keywords": ["claude", "claude-code", "ai", "developer-tools", "mcp"],
   "license": "MIT",
