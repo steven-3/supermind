@@ -17,9 +17,10 @@ const SAFE_READ_COMMANDS = [
   // System info
   "uname", "whoami", "hostname", "date", "env", "printenv",
   "nproc", "free", "uptime", "id",
-  // Node/npm read
+  // Node/npm/npx
   "node -e", "node -p", "npm ls", "npm list", "npm view", "npm info",
-  "npx which",
+  "npx which", "npx tsc", "npx eslint", "npx prettier", "npx vitest",
+  "npx jest", "npx tsx", "npx ts-node",
 ];
 
 // Commands that are safe but need prefix matching (not just first word)
