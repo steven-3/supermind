@@ -57,9 +57,6 @@ async function promptApiKeys(flags) {
   const tavily = await prompt('  Tavily API key (press Enter to skip): ');
   if (tavily) keys.TAVILY_API_KEY = tavily;
 
-  const magic = await prompt('  21st.dev API key for Magic MCP (press Enter to skip): ');
-  if (magic) keys.TWENTYFIRST_API_KEY = magic;
-
   return keys;
 }
 

@@ -136,23 +136,27 @@ function checkProjectHealth(projectDir) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 function main() {
-  const projectDir = process.env.PROJECT_DIR || process.cwd();
+  try {
+    const projectDir = process.env.PROJECT_DIR || process.cwd();
 
-  const outputParts = [];
+    const outputParts = [];
 
-  // Project health check
-  const healthWarning = checkProjectHealth(projectDir);
-  if (healthWarning) outputParts.push(healthWarning);
+    // Project health check
+    const healthWarning = checkProjectHealth(projectDir);
+    if (healthWarning) outputParts.push(healthWarning);
 
-  // Session context
-  const session = getLatestSession(projectDir);
-  outputParts.push(formatSessionContext(session));
+    // Session context
+    const session = getLatestSession(projectDir);
+    outputParts.push(formatSessionContext(session));
 
-  // Living docs
-  const docsContext = formatLivingDocs(projectDir);
-  if (docsContext) outputParts.push(docsContext);
+    // Living docs
+    const docsContext = formatLivingDocs(projectDir);
+    if (docsContext) outputParts.push(docsContext);
 
-  console.log(outputParts.join("\n---\n"));
+    console.log(outputParts.join("\n---\n"));
+  } catch (err) {
+    console.log("[Session] Hook error: " + err.message);
+  }
 }
 
 main();

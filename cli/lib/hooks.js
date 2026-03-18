@@ -28,21 +28,21 @@ function getHookSettings() {
     hooks: {
       PreToolUse: [{
         matcher: 'Bash',
-        hooks: [{ type: 'command', command: `node ${path.join(hooksDir, 'bash-permissions.js')}`, timeout: 5 }],
+        hooks: [{ type: 'command', command: `node "${path.join(hooksDir, 'bash-permissions.js')}"`, timeout: 5 }],
       }],
       SessionStart: [{
-        hooks: [{ type: 'command', command: `node ${path.join(hooksDir, 'session-start.js')}`, statusMessage: 'Loading session context...' }],
+        hooks: [{ type: 'command', command: `node "${path.join(hooksDir, 'session-start.js')}"`, statusMessage: 'Loading session context...' }],
       }],
       Stop: [{
         hooks: [
-          { type: 'command', command: `node ${path.join(hooksDir, 'session-end.js')}`, async: true },
-          { type: 'command', command: `node ${path.join(hooksDir, 'cost-tracker.js')}`, async: true },
+          { type: 'command', command: `node "${path.join(hooksDir, 'session-end.js')}"`, async: true },
+          { type: 'command', command: `node "${path.join(hooksDir, 'cost-tracker.js')}"`, async: true },
         ],
       }],
     },
     statusLine: {
       type: 'command',
-      command: `node ${path.join(hooksDir, 'statusline-command.js')}`,
+      command: `node "${path.join(hooksDir, 'statusline-command.js')}"`,
     },
   };
 }

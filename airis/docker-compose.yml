@@ -1,5 +1,5 @@
 # AIRIS MCP Gateway - Distribution Version
-# Usage: cd ~/.superclaude/airis-mcp-gateway && docker compose up -d
+# Usage: cd ~/.claude/airis && docker compose up -d
 
 name: airis-mcp-gateway
 

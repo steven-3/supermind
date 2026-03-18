@@ -8,7 +8,7 @@ Supermind is an npm package (`supermind-claude`) providing complete Claude Code 
 - `hooks/` — Runtime hooks copied to `~/.claude/hooks/` (session persistence, bash permissions, status line, cost tracking)
 - `skills/` — SKILL.md files copied to `~/.claude/skills/` (supermind-init, supermind-living-docs)
 - `templates/` — CLAUDE.md project template copied to `~/.claude/templates/`
-- `lib/` — Shared utilities (paths, settings builder, file operations)
+- `cli/lib/` — Shared utilities (paths, settings builder, file operations)
 
 ## Skill System
 - Superpowers skills are installed and auto-trigger per the using-superpowers meta-skill

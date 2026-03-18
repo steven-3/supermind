@@ -31,7 +31,7 @@ Section-level merging preserves your project-specific customizations while keepi
 
 ### Steps
 
-1. Read the template from `~/.claude/templates/CLAUDE.md`. If missing, tell the user to run `bash setup.sh` first and stop.
+1. Read the template from `~/.claude/templates/CLAUDE.md`. If missing, tell the user to run `npx supermind-claude` first and stop.
 
 2. Check if `CLAUDE.md` exists in the project root.
 

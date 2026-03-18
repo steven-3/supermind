@@ -17,10 +17,16 @@ function getGitInfo(cwd) {
     const branch = execSync("git rev-parse --abbrev-ref HEAD", {
       cwd, encoding: "utf-8",
     }).trim();
-    const diff = execSync(
-      "git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only",
-      { cwd, encoding: "utf-8" },
-    ).trim();
+    let diff = '';
+    try {
+      diff = execSync("git diff --name-only HEAD~1 HEAD", {
+        cwd, encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"],
+      }).trim();
+    } catch {
+      diff = execSync("git diff --name-only", {
+        cwd, encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"],
+      }).trim();
+    }
     const filesModified = diff ? diff.split("\n").filter(Boolean) : [];
     return { branch, filesModified };
   } catch {

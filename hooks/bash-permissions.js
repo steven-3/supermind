@@ -77,7 +77,7 @@ const DANGEROUS_PATTERNS = [
   /\brm\b/,
   /\brmdir\b/,
   /\bdel\b/,
-  /> \/dev\/null/,  // allow redirects TO /dev/null (safe) — but flag suspicious redirects
+  // Note: redirects to /dev/null are safe and handled by allowing the base command
 ];
 
 // ─── GitHub CLI patterns ─────────────────────────────────────────────────────
