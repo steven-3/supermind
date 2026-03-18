@@ -5,10 +5,11 @@ Complete, opinionated Claude Code setup — hooks, skills, status line, MCP serv
 ## Quick Install
 
 ```bash
-npx supermind-claude
+npm install -g supermind-claude
+supermind-claude
 ```
 
-Or give Claude Code the repo URL and it will figure out the setup.
+Or run without installing: `npx supermind-claude`
 
 ## What Gets Installed
 
@@ -46,21 +47,21 @@ Choose during setup:
 
 | Command | Purpose |
 |---------|---------|
-| `npx supermind-claude` | Full global setup |
-| `npx supermind-claude update` | Refresh hooks, skills, templates |
-| `npx supermind-claude doctor` | Verify installation health |
-| `npx supermind-claude uninstall` | Remove all components |
-| `npx supermind-claude approve "cmd"` | Permanently auto-approve a command |
+| `supermind-claude` | Full global setup |
+| `supermind-claude update` | Refresh hooks, skills, templates |
+| `supermind-claude doctor` | Verify installation health |
+| `supermind-claude uninstall` | Remove all components |
+| `supermind-claude approve "cmd"` | Permanently auto-approve a command |
 
 ## Approved Commands
 
 Permanently auto-approve specific commands that the bash-permissions hook would normally flag:
 
 ```bash
-npx supermind-claude approve "git push"        # exact/prefix match
-npx supermind-claude approve "/npm run .*/"    # regex match
-npx supermind-claude approve --list            # see all approved
-npx supermind-claude approve --remove "git push"  # remove approval
+supermind-claude approve "git push"        # exact/prefix match
+supermind-claude approve "/npm run .*/"    # regex match
+supermind-claude approve --list            # see all approved
+supermind-claude approve --remove "git push"  # remove approval
 ```
 
 Or tell Claude: "add that to my approved commands" — it knows how to edit the file directly.
@@ -71,7 +72,7 @@ Windows, macOS, and Linux. Requires Node.js >= 18.
 
 ## Troubleshooting
 
-Run `npx supermind-claude doctor` to check installation health. Common issues:
+Run `supermind-claude doctor` to check installation health. Common issues:
 - **Plugins not active**: Restart Claude Code after install
 - **Status line not showing**: Ensure Node.js is in PATH
-- **Hooks not firing**: Run `npx supermind-claude update` to re-register
+- **Hooks not firing**: Run `supermind-claude update` to re-register
