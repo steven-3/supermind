@@ -50,6 +50,20 @@ Choose during setup:
 | `npx supermind-claude update` | Refresh hooks, skills, templates |
 | `npx supermind-claude doctor` | Verify installation health |
 | `npx supermind-claude uninstall` | Remove all components |
+| `npx supermind-claude approve "cmd"` | Permanently auto-approve a command |
+
+## Approved Commands
+
+Permanently auto-approve specific commands that the bash-permissions hook would normally flag:
+
+```bash
+npx supermind-claude approve "git push"        # exact/prefix match
+npx supermind-claude approve "/npm run .*/"    # regex match
+npx supermind-claude approve --list            # see all approved
+npx supermind-claude approve --remove "git push"  # remove approval
+```
+
+Or tell Claude: "add that to my approved commands" — it knows how to edit the file directly.
 
 ## Platforms
 

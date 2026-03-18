@@ -19,6 +19,9 @@
 - Phase 3 in /supermind-init: health check and skill/MCP discovery
 - Version tracking via ~/.claude/.supermind-version
 - Cost tracker captures CLAUDE_SESSION_COST_USD
+- `npx supermind-claude approve` — permanently auto-approve specific commands
+- User-approved commands file (~/.claude/supermind-approved.json) with exact, prefix, and regex matching
+- Granular git stash classification: push/save/list/show auto-approved, drop/pop/clear require approval
 
 ### Removed
 - setup.sh, update.sh (replaced by CLI)
