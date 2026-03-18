@@ -87,9 +87,9 @@ cp "$SCRIPT_DIR/skills/living-docs/init/SKILL.md" "$SKILLS_DIR/living-docs/init/
 cp "$SCRIPT_DIR/skills/living-docs/init/architecture-template.md" "$SKILLS_DIR/living-docs/init/architecture-template.md"
 cp "$SCRIPT_DIR/skills/living-docs/init/design-template.md" "$SKILLS_DIR/living-docs/init/design-template.md"
 echo "  Installed living-docs:init skill"
-mkdir -p "$SKILLS_DIR/init"
-cp "$SCRIPT_DIR/skills/init/SKILL.md" "$SKILLS_DIR/init/SKILL.md"
-echo "  Installed init skill (run /init in any project)"
+mkdir -p "$SKILLS_DIR/sm/init"
+cp "$SCRIPT_DIR/skills/sm/init/SKILL.md" "$SKILLS_DIR/sm/init/SKILL.md"
+echo "  Installed sm:init skill (run /sm:init in any project)"
 echo "  Done."
 
 # ── 5. MCP Servers ──────────────────────────────────────────
@@ -108,7 +108,13 @@ fi
 
 # Magic (21st.dev)
 if [ -n "${TWENTYFIRST_API_KEY:-}" ]; then
-    claude mcp add -s user -e API_KEY="$TWENTYFIRST_API_KEY" magic -- cmd /c npx -y @21st-dev/magic@latest 2>/dev/null || true
+    OS_TYPE_MAGIC="$(uname -s)"
+    case "$OS_TYPE_MAGIC" in
+        MINGW*|MSYS*|CYGWIN*|*_NT*)
+            claude mcp add -s user -e API_KEY="$TWENTYFIRST_API_KEY" magic -- cmd /c npx -y @21st-dev/magic@latest 2>/dev/null || true ;;
+        *)
+            claude mcp add -s user -e API_KEY="$TWENTYFIRST_API_KEY" magic -- npx -y @21st-dev/magic@latest 2>/dev/null || true ;;
+    esac
     echo "  Added magic"
 else
     echo "  Skipped magic (no TWENTYFIRST_API_KEY in .env)"
@@ -128,36 +134,94 @@ if [ "$MCP_MODE" = "2" ]; then
     echo ""
     echo "  Installing MCP servers directly..."
 
-    claude mcp add -s user context7 -- npx -y @upstash/context7-mcp 2>/dev/null || true
+    # Detect Windows — npx requires 'cmd /c' wrapper
+    OS_TYPE="$(uname -s)"
+    IS_WINDOWS=false
+    case "$OS_TYPE" in
+        MINGW*|MSYS*|CYGWIN*|*_NT*) IS_WINDOWS=true ;;
+    esac
+
+    if [ "$IS_WINDOWS" = true ]; then
+        claude mcp add -s user context7 -- cmd /c npx -y @upstash/context7-mcp 2>/dev/null || true
+    else
+        claude mcp add -s user context7 -- npx -y @upstash/context7-mcp 2>/dev/null || true
+    fi
     echo "  Added context7 (library docs)"
 
-    claude mcp add -s user playwright -- npx -y @playwright/mcp@latest 2>/dev/null || true
+    if [ "$IS_WINDOWS" = true ]; then
+        claude mcp add -s user playwright -- cmd /c npx -y @playwright/mcp@latest 2>/dev/null || true
+    else
+        claude mcp add -s user playwright -- npx -y @playwright/mcp@latest 2>/dev/null || true
+    fi
     echo "  Added playwright (browser automation)"
+
+    if ! command -v uvx &>/dev/null; then
+        echo ""
+        echo "  uvx not found — installing uv (required for Serena)..."
+        OS_TYPE="$(uname -s)"
+        case "$OS_TYPE" in
+            MINGW*|MSYS*|CYGWIN*|*_NT*)
+                # Windows — use PowerShell installer
+                powershell -Command "irm https://astral.sh/uv/install.ps1 | iex" 2>&1 | sed 's/^/  /'
+                # Try common Windows install locations
+                for UV_DIR in "$LOCALAPPDATA/uv/bin" "$HOME/.local/bin" "$USERPROFILE/.local/bin"; do
+                    if [ -f "$UV_DIR/uvx" ] || [ -f "$UV_DIR/uvx.exe" ]; then
+                        export PATH="$UV_DIR:$PATH"
+                        echo "  Added $UV_DIR to PATH for this session"
+                        break
+                    fi
+                done
+                ;;
+            *)
+                # macOS/Linux
+                curl -LsSf https://astral.sh/uv/install.sh | sh 2>&1 | sed 's/^/  /'
+                for UV_DIR in "$HOME/.local/bin" "$HOME/.cargo/bin"; do
+                    if [ -f "$UV_DIR/uvx" ]; then
+                        export PATH="$UV_DIR:$PATH"
+                        echo "  Added $UV_DIR to PATH for this session"
+                        break
+                    fi
+                done
+                ;;
+        esac
+        echo ""
+    fi
 
     if command -v uvx &>/dev/null; then
         claude mcp add -s user serena -- uvx --from "git+https://github.com/oraios/serena" serena start-mcp-server --context claude-code --enable-web-dashboard false --enable-gui-log-window false 2>/dev/null || true
         echo "  Added serena (semantic code navigation)"
     else
-        echo ""
-        echo "  WARNING: 'uvx' not found in PATH — skipping Serena."
-        echo "  Serena requires uv/uvx. Install it:"
-        echo "    Windows (PowerShell): irm https://astral.sh/uv/install.ps1 | iex"
-        echo "    macOS/Linux:          curl -LsSf https://astral.sh/uv/install.sh | sh"
-        echo "  Then add the install directory to your PATH and re-run setup."
-        echo ""
+        echo "  ERROR: uvx still not found after install attempt."
+        echo "  Add the uv install directory to your system PATH, then re-run setup."
+        echo "  Common locations:"
+        echo "    Windows: %LOCALAPPDATA%\\uv\\bin"
+        echo "    macOS/Linux: ~/.local/bin"
+        exit 1
     fi
 
     if [ -n "${TAVILY_API_KEY:-}" ]; then
-        claude mcp add -s user -e TAVILY_API_KEY="$TAVILY_API_KEY" tavily -- npx -y tavily-mcp@0.1.2 2>/dev/null || true
+        if [ "$IS_WINDOWS" = true ]; then
+            claude mcp add -s user -e TAVILY_API_KEY="$TAVILY_API_KEY" tavily -- cmd /c npx -y tavily-mcp@0.1.2 2>/dev/null || true
+        else
+            claude mcp add -s user -e TAVILY_API_KEY="$TAVILY_API_KEY" tavily -- npx -y tavily-mcp@0.1.2 2>/dev/null || true
+        fi
         echo "  Added tavily (web search)"
     else
         echo "  Skipped tavily (no TAVILY_API_KEY in .env)"
     fi
 
-    claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest 2>/dev/null || true
+    if [ "$IS_WINDOWS" = true ]; then
+        claude mcp add -s user chrome-devtools -- cmd /c npx -y chrome-devtools-mcp@latest 2>/dev/null || true
+    else
+        claude mcp add -s user chrome-devtools -- npx -y chrome-devtools-mcp@latest 2>/dev/null || true
+    fi
     echo "  Added chrome-devtools"
 
-    claude mcp add -s user shadcn -- npx -y shadcn@latest mcp 2>/dev/null || true
+    if [ "$IS_WINDOWS" = true ]; then
+        claude mcp add -s user shadcn -- cmd /c npx -y shadcn@latest mcp 2>/dev/null || true
+    else
+        claude mcp add -s user shadcn -- npx -y shadcn@latest mcp 2>/dev/null || true
+    fi
     echo "  Added shadcn (UI components)"
 
     MCP_INSTALL_MODE="direct"

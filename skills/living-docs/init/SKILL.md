@@ -1,13 +1,13 @@
 ---
 name: living-docs:init
-description: Create AI-optimized ARCHITECTURE.md and DESIGN.md for a project via deep scan or skeleton templates. Run standalone or as part of /init.
+description: Create AI-optimized ARCHITECTURE.md and DESIGN.md for a project via deep scan or skeleton templates. Run standalone or as part of /sm:init.
 ---
 
 # Initialize Living Documentation
 
 Create AI-optimized `ARCHITECTURE.md` and optionally `DESIGN.md` for the current project. These files use a tables-over-prose format designed to save AI tokens — the AI reads the file index instead of scanning the entire project.
 
-Can be run standalone or as part of `/init`.
+Can be run standalone or as part of `/sm:init`.
 
 ## Process
 

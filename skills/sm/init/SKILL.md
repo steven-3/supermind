@@ -1,6 +1,6 @@
 ---
 name: init
-description: Initialize or update a project's CLAUDE.md from the installed template — run /init in any project directory
+description: Initialize or update a project's CLAUDE.md from the installed template — run /sm:init in any project directory
 ---
 
 # Project Initialization

@@ -14,7 +14,7 @@ This repo configures Claude Code with a full development workflow:
 | **Status Line** | Model, branch, context %, agents, cost at a glance | Two-line colored terminal display |
 | **MCP Servers** | Code nav, browser testing, web search, UI components | Docker (AIRIS gateway) or direct (individual servers) |
 | **Living Docs** | ARCHITECTURE.md and DESIGN.md stay in sync with code | Custom skill fires on conversation start + after changes |
-| **Project Template** | CLAUDE.md starter for any new project | `/init` skill auto-detects tech stack and fills it in |
+| **Project Template** | CLAUDE.md starter for any new project | `/sm:init` skill auto-detects tech stack and fills it in |
 | **UI Plugins** | Design guidance for frontend work | frontend-design, ui-ux-pro-max |
 
 ## Quick Start
@@ -25,7 +25,7 @@ Give Claude this repo URL and it will self-install:
 
 > Clone https://github.com/steven-3/claude-setup.git and run the setup script
 
-It will ask about API keys and Docker vs Direct MCP mode, then handle everything. After restarting Claude Code, run `/init` in your project to create or update your project's CLAUDE.md.
+It will ask about API keys and Docker vs Direct MCP mode, then handle everything. After restarting Claude Code, run `/sm:init` in your project to create or update your project's CLAUDE.md.
 
 ### Or do it yourself
 
@@ -119,9 +119,9 @@ claude plugin install ui-ux-pro-max@ui-ux-pro-max-skill
 
 `claude plugin install` sometimes says "already installed" when it actually failed. Verify with `claude plugin list` after setup.
 
-### The /init skill needs a restart first
+### The /sm:init skill needs a restart first
 
-The `/init` skill (for creating CLAUDE.md in new projects) is installed to `~/.claude/skills/` but won't be available until you restart Claude Code after running setup.
+The `/sm:init` skill (for creating CLAUDE.md in new projects) is installed to `~/.claude/skills/` but won't be available until you restart Claude Code after running setup.
 
 ### Settings are overwritten, not merged
 
@@ -131,7 +131,7 @@ The `/init` skill (for creating CLAUDE.md in new projects) is installed to `~/.c
 
 After installing, in any project directory:
 
-1. Run `/init` — auto-detects tech stack, creates CLAUDE.md, generates ARCHITECTURE.md
+1. Run `/sm:init` — auto-detects tech stack, creates CLAUDE.md, generates ARCHITECTURE.md
 2. Or manually: `cp ~/.claude/templates/CLAUDE.md ./CLAUDE.md` and fill in the blanks
 
 ## Detailed Setup Guide
