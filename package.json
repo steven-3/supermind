@@ -1,0 +1,26 @@
+{
+  "name": "supermind-claude",
+  "version": "2.0.0",
+  "description": "Complete, opinionated Claude Code setup — hooks, skills, status line, MCP servers, and living documentation",
+  "bin": {
+    "supermind-claude": "./cli/index.js",
+    "supermind": "./cli/index.js"
+  },
+  "files": [
+    "cli/",
+    "hooks/",
+    "skills/",
+    "templates/",
+    "airis/",
+    ".env.example"
+  ],
+  "keywords": ["claude", "claude-code", "ai", "developer-tools", "mcp"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/USER/supermind"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
