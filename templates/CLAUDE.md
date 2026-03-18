@@ -91,6 +91,6 @@ Use these naturally when relevant — don't wait to be asked.
 
 ## Living Documentation
 - At conversation start, check for `ARCHITECTURE.md` (always) and `DESIGN.md` (only if it exists).
-- If `ARCHITECTURE.md` is missing, prompt the user to run `/living-docs:init` before starting any coding work.
+- If `ARCHITECTURE.md` is missing, prompt the user to run `/sm:init` before starting any coding work.
 - If `DESIGN.md` exists, treat this as a UI project and maintain it alongside `ARCHITECTURE.md`.
 - After code changes, update `ARCHITECTURE.md`. After design/UI changes, update `DESIGN.md` (if it exists).

@@ -7,7 +7,7 @@ This setup uses **Superpowers** as the base skill system with ECC-inspired sessi
 - Superpowers skills are installed and auto-trigger per the using-superpowers meta-skill
 - When I prefix a request with "quick:", skip brainstorming and skill gates
 - Superpowers enforcement takes priority over all other methodology guidance **except** Git Permissions, Shell Permissions, and Worktree Workflow rules in this file — those are enforced by a PreToolUse hook and must not be second-guessed or re-prompted by skills
-- **living-docs** skill keeps ARCHITECTURE.md and DESIGN.md in sync with code changes (fires on conversation start + after changes)
+- **`/sm:living-docs`** keeps ARCHITECTURE.md and DESIGN.md in sync with code changes (fires on conversation start + after changes)
 
 ## Git Permissions
 
@@ -87,7 +87,7 @@ Use these naturally when relevant — don't wait to be asked.
 
 ## Living Documentation
 - At conversation start, check for `ARCHITECTURE.md` (always) and `DESIGN.md` (only if it exists).
-- If `ARCHITECTURE.md` is missing, prompt the user to run `/living-docs:init` before starting any coding work.
+- If `ARCHITECTURE.md` is missing, prompt the user to run `/sm:init` before starting any coding work.
 - If `DESIGN.md` exists, treat this as a UI project and maintain it alongside `ARCHITECTURE.md`.
 - After code changes, update `ARCHITECTURE.md`. After design/UI changes, update `DESIGN.md` (if it exists).
 

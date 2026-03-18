@@ -26,26 +26,17 @@ echo "  Updated: session-start, session-end, cost-tracker, statusline, bash-perm
 # ── Skills ─────────────────────────────────────────────────
 echo "[2/3] Updating skills..."
 
-# Remove old /init skill (renamed to /sm:init)
-if [ -d "$SKILLS_DIR/init" ]; then
-    rm -rf "$SKILLS_DIR/init"
-    echo "  Removed old /init skill"
-fi
+# Remove old skill paths from previous versions
+rm -rf "$SKILLS_DIR/init" "$SKILLS_DIR/sm" "$SKILLS_DIR/living-docs" 2>/dev/null
 
-mkdir -p "$SKILLS_DIR/sm/init"
-cp "$SCRIPT_DIR/skills/sm/SKILL.md" "$SKILLS_DIR/sm/SKILL.md"
-cp "$SCRIPT_DIR/skills/sm/init/SKILL.md" "$SKILLS_DIR/sm/init/SKILL.md"
-echo "  Updated sm:init"
-
-mkdir -p "$SKILLS_DIR/living-docs"
-cp "$SCRIPT_DIR/skills/living-docs/SKILL.md" "$SKILLS_DIR/living-docs/SKILL.md"
-echo "  Updated living-docs"
-
-mkdir -p "$SKILLS_DIR/living-docs/init"
-cp "$SCRIPT_DIR/skills/living-docs/init/SKILL.md" "$SKILLS_DIR/living-docs/init/SKILL.md"
-cp "$SCRIPT_DIR/skills/living-docs/init/architecture-template.md" "$SKILLS_DIR/living-docs/init/architecture-template.md"
-cp "$SCRIPT_DIR/skills/living-docs/init/design-template.md" "$SKILLS_DIR/living-docs/init/design-template.md"
-echo "  Updated living-docs:init + templates"
+mkdir -p "$SKILLS_DIR/supermind/init"
+mkdir -p "$SKILLS_DIR/supermind/living-docs"
+cp "$SCRIPT_DIR/skills/supermind/SKILL.md" "$SKILLS_DIR/supermind/SKILL.md"
+cp "$SCRIPT_DIR/skills/supermind/init/SKILL.md" "$SKILLS_DIR/supermind/init/SKILL.md"
+cp "$SCRIPT_DIR/skills/supermind/init/architecture-template.md" "$SKILLS_DIR/supermind/init/architecture-template.md"
+cp "$SCRIPT_DIR/skills/supermind/init/design-template.md" "$SKILLS_DIR/supermind/init/design-template.md"
+cp "$SCRIPT_DIR/skills/supermind/living-docs/SKILL.md" "$SKILLS_DIR/supermind/living-docs/SKILL.md"
+echo "  Updated supermind skills (/sm:init, /sm:living-docs)"
 
 # ── Templates ──────────────────────────────────────────────
 echo "[3/3] Updating CLAUDE.md template..."

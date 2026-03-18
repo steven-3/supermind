@@ -24,7 +24,7 @@ Maintain living documents that stay synchronized with the codebase. **Read them 
 2. Read `DESIGN.md` from the project root **only if it exists**. Its existence means this is a UI project.
 3. Use them as context for understanding the current system state.
 4. Reference them when making decisions about where code goes and how it should look.
-5. If `ARCHITECTURE.md` is missing, prompt the user: "No ARCHITECTURE.md found. Run `/living-docs:init` to create one before starting work."
+5. If `ARCHITECTURE.md` is missing, prompt the user: "No ARCHITECTURE.md found. Run `/sm:init` to create one before starting work."
 
 ### After Code Changes
 

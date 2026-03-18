@@ -82,20 +82,18 @@ else
 fi
 mkdir -p "$CLAUDE_DIR/sessions"
 
-# Install skills
+# Install skills (Supermind — /sm:*)
 SKILLS_DIR="$CLAUDE_DIR/skills"
-mkdir -p "$SKILLS_DIR/living-docs"
-cp "$SCRIPT_DIR/skills/living-docs/SKILL.md" "$SKILLS_DIR/living-docs/SKILL.md"
-echo "  Installed living-docs skill"
-mkdir -p "$SKILLS_DIR/living-docs/init"
-cp "$SCRIPT_DIR/skills/living-docs/init/SKILL.md" "$SKILLS_DIR/living-docs/init/SKILL.md"
-cp "$SCRIPT_DIR/skills/living-docs/init/architecture-template.md" "$SKILLS_DIR/living-docs/init/architecture-template.md"
-cp "$SCRIPT_DIR/skills/living-docs/init/design-template.md" "$SKILLS_DIR/living-docs/init/design-template.md"
-echo "  Installed living-docs:init skill"
-mkdir -p "$SKILLS_DIR/sm/init"
-cp "$SCRIPT_DIR/skills/sm/SKILL.md" "$SKILLS_DIR/sm/SKILL.md"
-cp "$SCRIPT_DIR/skills/sm/init/SKILL.md" "$SKILLS_DIR/sm/init/SKILL.md"
-echo "  Installed sm:init skill (run /sm:init in any project)"
+# Remove old skill paths from previous versions
+rm -rf "$SKILLS_DIR/init" "$SKILLS_DIR/sm" "$SKILLS_DIR/living-docs" 2>/dev/null
+mkdir -p "$SKILLS_DIR/supermind/init"
+mkdir -p "$SKILLS_DIR/supermind/living-docs"
+cp "$SCRIPT_DIR/skills/supermind/SKILL.md" "$SKILLS_DIR/supermind/SKILL.md"
+cp "$SCRIPT_DIR/skills/supermind/init/SKILL.md" "$SKILLS_DIR/supermind/init/SKILL.md"
+cp "$SCRIPT_DIR/skills/supermind/init/architecture-template.md" "$SKILLS_DIR/supermind/init/architecture-template.md"
+cp "$SCRIPT_DIR/skills/supermind/init/design-template.md" "$SKILLS_DIR/supermind/init/design-template.md"
+cp "$SCRIPT_DIR/skills/supermind/living-docs/SKILL.md" "$SKILLS_DIR/supermind/living-docs/SKILL.md"
+echo "  Installed supermind skills (/sm:init, /sm:living-docs)"
 echo "  Done."
 
 # ── 5. MCP Servers ──────────────────────────────────────────

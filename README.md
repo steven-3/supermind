@@ -13,7 +13,7 @@ This repo configures Claude Code with a full development workflow:
 | **Bash Permissions** | Auto-approves safe commands, blocks dangerous ones | PreToolUse hook parses compound commands segment-by-segment |
 | **Status Line** | Model, branch, context %, agents, cost at a glance | Two-line colored terminal display |
 | **MCP Servers** | Code nav, browser testing, web search, UI components | Docker (AIRIS gateway) or direct (individual servers) |
-| **Living Docs** | ARCHITECTURE.md and DESIGN.md stay in sync with code | Custom skill fires on conversation start + after changes |
+| **Living Docs** | ARCHITECTURE.md and DESIGN.md stay in sync with code | `/sm:living-docs` fires on conversation start + after changes |
 | **Project Template** | CLAUDE.md starter for any new project | `/sm:init` skill auto-detects tech stack and fills it in |
 | **UI Plugins** | Design guidance for frontend work | frontend-design, ui-ux-pro-max |
 

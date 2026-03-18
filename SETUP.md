@@ -33,11 +33,11 @@ Restart Claude Code after setup completes.
 | `hooks/statusline-command.js` | `~/.claude/hooks/` | Two-line colored status bar with metrics |
 | `hooks/bash-permissions.js` | `~/.claude/hooks/` | PreToolUse hook that auto-approves safe Bash commands |
 | `hooks.json` | `~/.claude/hooks.json` | Hook event definitions (skipped if already exists) |
-| `skills/living-docs/SKILL.md` | `~/.claude/skills/living-docs/` | Auto-syncs ARCHITECTURE.md and DESIGN.md |
-| `skills/sm/init/SKILL.md` | `~/.claude/skills/sm/init/` | Initialize/update CLAUDE.md with smart merge (`/sm:init`) |
-| `skills/living-docs/init/SKILL.md` | `~/.claude/skills/living-docs/init/` | Creates AI-optimized ARCHITECTURE.md and DESIGN.md |
-| `skills/living-docs/init/architecture-template.md` | `~/.claude/skills/living-docs/init/` | Skeleton template for ARCHITECTURE.md |
-| `skills/living-docs/init/design-template.md` | `~/.claude/skills/living-docs/init/` | Skeleton template for DESIGN.md |
+| `skills/supermind/SKILL.md` | `~/.claude/skills/supermind/` | Supermind parent skill (registers `/sm:*` commands) |
+| `skills/supermind/init/SKILL.md` | `~/.claude/skills/supermind/init/` | Full project init: CLAUDE.md merge + ARCHITECTURE.md + DESIGN.md (`/sm:init`) |
+| `skills/supermind/init/architecture-template.md` | `~/.claude/skills/supermind/init/` | Skeleton template for ARCHITECTURE.md |
+| `skills/supermind/init/design-template.md` | `~/.claude/skills/supermind/init/` | Skeleton template for DESIGN.md |
+| `skills/supermind/living-docs/SKILL.md` | `~/.claude/skills/supermind/living-docs/` | Ongoing doc sync (`/sm:living-docs`) |
 | `airis/docker-compose.yml` | `~/.claude/airis-mcp-gateway/` | Docker stack for MCP servers |
 | `airis/mcp-config.json` | `~/.claude/airis-mcp-gateway/` | MCP server registry |
 | `templates/CLAUDE.md` | `~/.claude/templates/CLAUDE.md` | Starter CLAUDE.md for new projects |
