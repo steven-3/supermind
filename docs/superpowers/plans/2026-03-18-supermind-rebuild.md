@@ -103,17 +103,20 @@ function showHelp() {
 `);
 }
 
-function main() {
+async function main() {
   const { command, flags } = parseArgs(process.argv);
 
   if (flags.version) { console.log(version); process.exit(0); }
   if (flags.help) { showHelp(); process.exit(0); }
 
   const run = COMMANDS[command]();
-  run(flags);
+  await run(flags);
 }
 
-main();
+main().catch(err => {
+  console.error(`\n  \x1b[31m✗\x1b[0m ${err.message}\n`);
+  process.exit(1);
+});
 ```
 
 - [ ] **Step 3: Verify the CLI entry point parses args correctly**
@@ -396,9 +399,8 @@ function removeSupermindEntries(settings) {
     if (Object.keys(result.hooks).length === 0) delete result.hooks;
   }
 
-  // Remove scalars Supermind set
-  delete result.alwaysThinkingEnabled;
-  delete result.effortLevel;
+  // Note: do NOT delete scalars like alwaysThinkingEnabled/effortLevel —
+  // the user may have set these independently. Supermind only sets them if absent.
 
   return result;
 }
@@ -511,9 +513,14 @@ function getHookSettings() {
   };
 }
 
+// Fallback list if package source is unavailable
+const KNOWN_HOOKS = ['bash-permissions.js', 'session-start.js', 'session-end.js', 'cost-tracker.js', 'statusline-command.js'];
+
 function removeHooks() {
   if (!fs.existsSync(PATHS.hooksDir)) return;
-  for (const file of getHookFiles()) {
+  let files;
+  try { files = getHookFiles(); } catch { files = KNOWN_HOOKS; }
+  for (const file of files) {
     const target = path.join(PATHS.hooksDir, file);
     if (fs.existsSync(target)) {
       fs.unlinkSync(target);
@@ -569,8 +576,12 @@ function installSkills() {
   return dirs;
 }
 
+// Fallback list if package source is unavailable
+const KNOWN_SKILLS = ['supermind', 'supermind-init', 'supermind-living-docs'];
+
 function removeSkills() {
-  const dirs = getSkillDirs();
+  let dirs;
+  try { dirs = getSkillDirs(); } catch { dirs = KNOWN_SKILLS; }
   for (const dir of dirs) {
     const target = path.join(PATHS.skillsDir, dir);
     if (fs.existsSync(target)) {
@@ -698,10 +709,35 @@ async function setupDocker() {
   }
 }
 
-function setupDirect() {
+async function promptApiKeys(flags) {
+  const keys = {};
+  if (flags.nonInteractive) return keys;
+
+  const tavily = await prompt('  Tavily API key (press Enter to skip): ');
+  if (tavily) keys.TAVILY_API_KEY = tavily;
+
+  const magic = await prompt('  21st.dev API key for Magic MCP (press Enter to skip): ');
+  if (magic) keys.TWENTYFIRST_API_KEY = magic;
+
+  return keys;
+}
+
+function setupDirect(apiKeys) {
   const config = getDirectMcpConfig();
-  // Return MCP server entries for merging into settings.json mcpServers
-  return config.mcpServers || {};
+  const servers = config.mcpServers || {};
+
+  // Inject API keys into server configs that need them
+  if (apiKeys.TAVILY_API_KEY && servers.tavily) {
+    servers.tavily.env = { TAVILY_API_KEY: apiKeys.TAVILY_API_KEY };
+  }
+
+  // Remove servers that require missing API keys
+  if (!apiKeys.TAVILY_API_KEY && servers.tavily?.env?.TAVILY_API_KEY?.startsWith('$')) {
+    logger.warn('Skipping Tavily (no API key)');
+    delete servers.tavily;
+  }
+
+  return servers;
 }
 
 async function setupMcp(flags) {
@@ -726,7 +762,8 @@ async function setupMcp(flags) {
   }
 
   if (mode === 'direct') {
-    const servers = setupDirect();
+    const apiKeys = await promptApiKeys(flags);
+    const servers = setupDirect(apiKeys);
     logger.success(`Configured ${Object.keys(servers).length} MCP servers`);
     return { mcpServers: servers };
   }
@@ -813,7 +850,7 @@ module.exports = async function install(flags) {
   const skillDirs = installSkills();
   logger.info(`${skillDirs.length} skill directories installed`);
 
-  // Step 5: Plugins
+  // Step 5: Plugins (data already merged in Step 2 via getPluginDefaults — this step is log-only)
   logger.step(5, TOTAL, 'Enabling plugins...');
   logger.success('superpowers, frontend-design, claude-md-management, ui-ux-pro-max');
 
@@ -1006,6 +1043,15 @@ module.exports = function doctor(flags) {
     } catch { return false; }
   })());
 
+  // Docker (warn only, not required)
+  try {
+    require('child_process').execSync('docker compose version', { stdio: 'pipe', timeout: 5000 });
+    logger.success('Docker available');
+    passed++;
+  } catch {
+    logger.warn('Docker not available (optional — needed for AIRIS mode)');
+  }
+
   // Version
   let installedVersion = 'not found';
   try { installedVersion = fs.readFileSync(PATHS.versionFile, 'utf-8').trim(); } catch {}
@@ -1110,22 +1156,25 @@ git commit -m "Add doctor and uninstall CLI commands"
 **Files:**
 - Rewrite: `hooks/bash-permissions.js`
 
-- [ ] **Step 1: Rewrite hooks/bash-permissions.js**
+**IMPORTANT:** Read the current `hooks/bash-permissions.js` first. This is battle-tested classification logic. The rewrite must preserve EVERY classification behavior — same commands get the same allow/ask decisions. The goal is structural cleanup only, not behavioral change.
 
-Same logic as current, but cleaned up: constants at top, clear sections, under 150 lines. The current file is 357 lines and works well — the rewrite preserves all behavior while being more concise.
+- [ ] **Step 1: Read current hooks/bash-permissions.js and understand all classification rules**
 
-Key simplifications:
-- Combine `SAFE_READ_COMMANDS` and `SAFE_PREFIXES` into a single lookup
-- Inline `isSedSafe` check
-- Keep the compound command parser but simplify the pipe-splitting
-- Keep `detectWorktreeContext` and `classifySegment` logic intact
+Read the file. Note all safe commands, git classifications, worktree detection, compound command splitting, pipe handling, and gh CLI patterns. These must all be preserved exactly.
 
-The current `hooks/bash-permissions.js` is well-tested and working. Rewrite it maintaining the same exact classification behavior but with:
-- Constants grouped at top (SAFE_CMDS, SAFE_PREFIXES, GIT_SAFE_READ, GIT_SAFE_WRITE, GIT_WORKTREE_ONLY, GIT_DANGEROUS, DANGEROUS_PATTERNS, SAFE_WRITE_CMDS, GH_DANGEROUS)
-- Single `classifySegment(cmd, opts)` function
-- Single `splitCompound(command)` function for `&&`/`||`/`;` splitting with quote awareness
-- Single `splitPipes(segment)` function
-- Main function reads stdin JSON, classifies, outputs JSON
+- [ ] **Step 2: Rewrite hooks/bash-permissions.js**
+
+Restructure for clarity while preserving identical behavior:
+- Group all constants at top: SAFE_READ_CMDS, SAFE_PREFIXES, GIT_SAFE_READ, GIT_SAFE_WRITE, GIT_WORKTREE_ONLY, GIT_DANGEROUS, DANGEROUS_PATTERNS, SAFE_WRITE_CMDS, GH_DANGEROUS_PATTERNS
+- Keep ALL entries in every list — do not drop any
+- Keep the compound command parser (splitCompound) with its quote-aware splitting on `&&`/`||`/`;`
+- Keep the pipe-splitting logic within segments
+- Keep `detectWorktreeContext` — it checks both `cd` targets and git worktree commands for .worktrees paths
+- Keep `stripGitGlobalFlags` — it handles -C, -c, --git-dir, --work-tree, --no-pager etc.
+- Keep `classifySegment` with its full chain: env var stripping → gh → git → sed → prefixes → first word → first two words → unknown=ask
+- Main: read stdin JSON, extract command, classify, output JSON with permissionDecision
+
+If the restructured file exceeds 200 lines that's fine — correctness over brevity.
 
 - [ ] **Step 2: Verify the rewritten hook produces same output for key test cases**
 
@@ -1152,24 +1201,63 @@ git commit -m "Rewrite bash-permissions hook: same logic, cleaner structure"
 **Files:**
 - Rewrite: `hooks/session-start.js`
 
-- [ ] **Step 1: Rewrite hooks/session-start.js**
+**IMPORTANT:** Read the current `hooks/session-start.js` first. Preserve the session-loading behavior, then add the new ARCHITECTURE.md/DESIGN.md extraction.
 
-Merged responsibility: load previous session context + extract ARCHITECTURE.md/DESIGN.md summaries.
+- [ ] **Step 1: Read current hooks/session-start.js**
 
-Key behaviors:
-1. Resolve project dir via `process.env.PROJECT_DIR || process.cwd()`
-2. Load most recent session file from `~/.claude/sessions/` (max 7 days old, matching project)
-3. Read `ARCHITECTURE.md` if exists — extract: Overview first paragraph, Tech Stack table, section headings as TOC. Cap at ~200 tokens (~800 chars).
-4. Read `DESIGN.md` if exists — extract: Overview section, section headings. Cap at ~100 tokens (~400 chars).
-5. If ARCHITECTURE.md missing, output note to run `/supermind-init`
-6. Output combined context
+Note: current file loads session context and checks for CLAUDE.md. The rewrite keeps session loading, drops the CLAUDE.md check (redundant), and adds markdown document extraction.
 
-Markdown extraction logic:
-- Split on `## ` headings
-- "Overview" section: take first paragraph (up to first blank line)
-- "Tech Stack" section: take the full table (lines starting with `|`)
-- All other sections: just the heading name
-- Char-count truncation with priority (overview > tech stack > headings)
+- [ ] **Step 2: Rewrite hooks/session-start.js**
+
+The hook does two things:
+
+**Part A — Session loading (preserve from current):**
+- Resolve project dir via `process.env.PROJECT_DIR || process.cwd()`
+- Read most recent session file from `~/.claude/sessions/` (max 7 days, matching project)
+- Format: age, summary, branch, modified files, decisions, next steps
+
+**Part B — Living docs extraction (new):**
+- Check for `ARCHITECTURE.md` in project root
+- If exists, extract a structural summary (NO LLM compression — pure string parsing):
+
+```js
+function extractArchSummary(content, maxChars = 800) {
+  const sections = content.split(/^## /m);
+  const headings = [];
+  let overview = '';
+  let techStack = '';
+
+  for (const section of sections) {
+    const lines = section.split('\n');
+    const title = lines[0]?.trim();
+    if (!title) continue;
+    headings.push(title);
+
+    if (/overview/i.test(title)) {
+      // First non-empty paragraph after the heading
+      const body = lines.slice(1).join('\n').trim();
+      const firstPara = body.split(/\n\s*\n/)[0] || '';
+      overview = firstPara.slice(0, 400);
+    }
+    if (/tech stack/i.test(title)) {
+      // Extract table rows
+      const tableLines = lines.filter(l => l.trim().startsWith('|'));
+      techStack = tableLines.join('\n').slice(0, 300);
+    }
+  }
+
+  const parts = [];
+  if (overview) parts.push(`Overview: ${overview}`);
+  if (techStack) parts.push(`Tech Stack:\n${techStack}`);
+  if (headings.length) parts.push(`Sections: ${headings.join(', ')}`);
+
+  return parts.join('\n').slice(0, maxChars);
+}
+```
+
+- Similarly for `DESIGN.md` (maxChars = 400): extract Overview + section headings only
+- If ARCHITECTURE.md missing, include: `"[Setup] No ARCHITECTURE.md found. Run /supermind-init to create one."`
+- Output combined: session context + `\n---\n` + doc summaries
 
 - [ ] **Step 2: Test the hook with a project that has ARCHITECTURE.md**
 
@@ -1219,14 +1307,20 @@ git commit -m "Rewrite session-end and cost-tracker hooks"
 **Files:**
 - Rewrite: `hooks/statusline-command.js`
 
-- [ ] **Step 1: Rewrite hooks/statusline-command.js**
+**IMPORTANT:** Read the current `hooks/statusline-command.js` first. This hook produces the two-line terminal display. The rewrite must produce visually identical output. Preserve ALL features: git branch detection, context bar gradient, subagent tracking, thinking level icon, supabase ref, cost display.
 
-Same two-line display, cleaned up. The current file is 207 lines and works well. Rewrite with:
-- Data collection section: user, host, cwd, model, git branch, thinking level, supabase ref, active agents, context window, cost
-- Rendering section: ANSI color palette, progress bar, separator helpers
-- Output section: compose and print line1 + line2
+- [ ] **Step 1: Read current hooks/statusline-command.js**
 
-Keep all existing functionality. Target under 150 lines by removing redundant comments and tightening the subagent detection logic.
+Note all data sources (stdin JSON, env vars, file reads) and all rendering details (colors, separators, progress bar gradient thresholds, spinner animation, token formatting).
+
+- [ ] **Step 2: Rewrite hooks/statusline-command.js**
+
+Reorganize into three clear sections:
+1. **Data collection**: stdin JSON parsing, env vars, git branch (symbolic-ref with short hash fallback), settings read for thinking level, .mcp.json for supabase ref, transcript tail for active agents, context window stats, cost
+2. **Rendering helpers**: color constants, `fmt(n)` for token formatting, `progressBar(pct, width)` with gradient (teal→sky→rose at 75%), separators
+3. **Output**: compose line1 (identity + location) and line2 (metrics), print
+
+Keep the subagent detection logic (transcript tail parsing) exactly as-is — it's the most complex part. If the file exceeds 150 lines that's fine — correctness over brevity.
 
 - [ ] **Step 2: Verify the hook outputs colored status**
 
@@ -1281,28 +1375,66 @@ git commit -m "Rewrite supermind namespace parent skill"
 - Keep: `skills/supermind-init/architecture-template.md` (clean up)
 - Keep: `skills/supermind-init/design-template.md` (clean up)
 
-- [ ] **Step 1: Write skills/supermind-init/SKILL.md**
+**IMPORTANT:** Read the current `skills/supermind-init/SKILL.md` first. It has the right structure but needs improvements. Also read the spec Section 7.2 for the three-phase design. Also read `skills/skill-creator/SKILL.md` guidelines at https://raw.githubusercontent.com/anthropics/skills/main/skills/skill-creator/SKILL.md for skill-creator best practices.
 
-Follow skill-creator patterns: pushy description, imperative instructions, explain reasoning not just rules, under 500 lines. Three clear phases.
+- [ ] **Step 1: Read current skill and spec**
 
-The SKILL.md should contain the full instructions for Claude when this skill triggers. Reference the template files as bundled resources. Include the phase structure from the spec (Phase 1: CLAUDE.md, Phase 2: Living Docs, Phase 3: Health & Discovery).
+Read `skills/supermind-init/SKILL.md` (current, 122 lines). Note what works and what needs changing:
+- Current has Phase 1 (CLAUDE.md) and Phase 2 (Living Docs) — both good but need polish
+- Missing: Phase 3 (Health & Discovery with optional subagent)
+- Needs: skill-creator style (explain reasoning, not just directives; pushy description)
 
-Key improvements over current:
-- Clearer section ownership rules for CLAUDE.md merge
-- Better auto-detection instructions
-- Phase 3 is new (health check + optional skill/MCP research subagent)
-- Explain WHY each step matters (skill-creator guidance)
+- [ ] **Step 2: Rewrite skills/supermind-init/SKILL.md**
 
-- [ ] **Step 2: Verify SKILL.md has valid frontmatter**
+Structure:
+```
+---
+name: supermind-init
+description: "Initialize a project with Supermind. Use when starting work in a new project, when ARCHITECTURE.md is missing, or when the user wants to set up CLAUDE.md, living documentation, and project health checks. Triggers on: new project setup, missing docs, /supermind-init"
+---
+```
+
+**Phase 1 — CLAUDE.md Management** (preserve logic from current, clean up):
+- Section ownership: project-specific (Quick Reference, Commands, Tech Stack, Project Structure, custom) vs infrastructure (Shell & Git Permissions, Worktree Workflow, MCP Servers, UI Changes, Living Documentation)
+- Template source: `~/.claude/templates/CLAUDE.md`
+- Merge algorithm: parse on `## ` headings, keep user preamble, preserve project-specific if non-empty, replace infrastructure, append custom sections
+- Auto-detect: package.json, Cargo.toml, go.mod, requirements.txt, pyproject.toml, Gemfile
+- Fill empty sections: Commands from scripts, Tech Stack from deps, Project Structure from directory scan
+
+**Phase 2 — Living Documentation** (preserve from current, clean up):
+- Ask about UI → determines DESIGN.md creation
+- Detect scope (subfolder vs repo vs monorepo)
+- Check existing ARCHITECTURE.md/DESIGN.md (keep, migrate, or create)
+- Deep scan with exclusions (node_modules, dist, build, .git, etc.)
+- Generate from templates (read architecture-template.md, design-template.md from skill directory)
+- Leave unfilled sections with `<!-- No [X] detected -->`
+- Commit generated files
+
+**Phase 3 — Project Health & Discovery (NEW):**
+- Ask: "Would you like me to check your Supermind setup and research additional tools for this project?"
+- If yes:
+  - Verify session hooks are firing (check `~/.claude/sessions/` for recent files)
+  - Check if Serena is configured (look for `.serena/` in project)
+  - Spawn a subagent to research skills/MCPs relevant to the detected tech stack
+  - Present findings as suggestions with brief explanations
+- If no: skip, done
+
+Use skill-creator style: explain WHY (e.g., "ARCHITECTURE.md uses tables-over-prose because it saves tokens — the AI reads the file index instead of scanning the entire project"). Under 500 lines.
+
+- [ ] **Step 3: Verify SKILL.md has valid frontmatter**
 
 Run: `node -e "const fs = require('fs'); const c = fs.readFileSync('skills/supermind-init/SKILL.md','utf8'); console.log(c.startsWith('---'))"`
 Expected: `true`
 
-- [ ] **Step 3: Clean up architecture-template.md and design-template.md**
+- [ ] **Step 4: Clean up architecture-template.md and design-template.md**
 
-Review the existing templates. They're already in good shape — just verify they match the spec's section lists and clean up any inconsistencies.
+Read both files. Verify section headings match the spec:
+- architecture-template.md: Overview, Tech Stack, File Index, Dependencies & Data Flow, API Contracts, Environment Variables, Key Patterns & Conventions
+- design-template.md: Overview, Color Tokens, Typography, Spacing Scale, Component Patterns, Layout Conventions, Animation Patterns
 
-- [ ] **Step 4: Commit**
+Fix any mismatches. Keep table header formatting.
+
+- [ ] **Step 5: Commit**
 
 ```bash
 git add skills/supermind-init/
@@ -1316,19 +1448,40 @@ git commit -m "Rewrite supermind-init skill with three-phase onboarding"
 **Files:**
 - Rewrite: `skills/supermind-living-docs/SKILL.md`
 
-- [ ] **Step 1: Write skills/supermind-living-docs/SKILL.md**
+**IMPORTANT:** Read the current `skills/supermind-living-docs/SKILL.md` first. It currently handles both auto-read-on-start AND manual sync. The rewrite keeps ONLY the manual sync — auto-read is now handled by the session-start.js hook.
 
-This is the manual "sync now" command. The auto-read behavior is handled by the session-start hook.
+- [ ] **Step 1: Read current skill and rewrite**
 
-Follow skill-creator patterns. Key content:
-- When invoked, read ARCHITECTURE.md and DESIGN.md (if exists)
-- Analyze recent changes via git diff
-- Reason about what needs updating — don't update if nothing meaningful changed
-- Make surgical edits (Edit tool, not full rewrites)
-- Commit if changes were made
-- Explain reasoning behind update rules
+Read `skills/supermind-living-docs/SKILL.md` (current, 68 lines).
 
-Remove the "On Every Conversation Start" workflow (now handled by session-start.js hook) and the Serena integration section (over-scoped).
+Rewrite as the manual "sync now" command:
+
+```
+---
+name: supermind-living-docs
+description: "Manually sync living documentation. Use when ARCHITECTURE.md or DESIGN.md need updating after code changes, when the user asks to update docs, or as a periodic check. Does not auto-trigger — this is the manual 'sync now' command."
+---
+```
+
+Content:
+1. Read ARCHITECTURE.md (required) and DESIGN.md (if exists) from project root
+2. Run `git diff --name-only` and `git diff --stat` to understand recent changes
+3. Reason about what needs updating:
+   - Files added/removed/renamed → update File Index
+   - API routes changed → update API Contracts
+   - Dependencies changed → update Tech Stack, Dependencies & Data Flow
+   - Env vars changed → update Environment Variables
+   - UI changes (if DESIGN.md exists) → update relevant design sections
+4. If nothing meaningful changed, say so and stop
+5. Make surgical edits using Edit tool — do NOT rewrite entire files
+6. Match existing format and section structure
+7. Commit with descriptive message: "Update ARCHITECTURE.md: [what changed]"
+
+Remove: "On Every Conversation Start" section (handled by hook), Serena integration (over-scoped), "What NOT to Do" (obvious)
+
+Keep: Update rules (be surgical, use Edit tool, keep factual, include file paths, match existing format)
+
+Style: explain reasoning (e.g., "Surgical edits preserve your existing formatting and avoid unnecessary diffs. Rewriting the whole file would make git history harder to follow.")
 
 - [ ] **Step 2: Commit**
 
@@ -1344,20 +1497,33 @@ git commit -m "Rewrite supermind-living-docs skill as manual sync command"
 **Files:**
 - Rewrite: `templates/CLAUDE.md`
 
-- [ ] **Step 1: Rewrite templates/CLAUDE.md**
+**IMPORTANT:** Read the current `templates/CLAUDE.md` first. It's 97 lines and mostly good. The rewrite fixes naming (hyphen not colon), updates the Living Documentation section to reference the hook, and cleans up.
 
-Simplified starter template per spec Section 8.1:
-- Quick Reference (ARCHITECTURE.md, DESIGN.md links)
-- Commands (placeholder)
-- Tech Stack (placeholder)
-- Project Structure (placeholder)
-- Shell & Git Permissions (complete, references bash-permissions.js)
-- Worktree Development Workflow (complete)
-- MCP Servers (complete)
-- UI Changes (references /ui-ux-pro-max)
-- Living Documentation (explains hook auto-read + /supermind-living-docs manual sync)
+- [ ] **Step 1: Read current and rewrite templates/CLAUDE.md**
 
-Fix: change `/supermind:init` references to `/supermind-init` throughout.
+Read `templates/CLAUDE.md`. Rewrite with these sections:
+
+**Placeholder sections** (filled by /supermind-init):
+- `## Quick Reference` — links to ARCHITECTURE.md, DESIGN.md
+- `## Commands` — `<!-- Fill in or run /supermind-init to auto-detect -->`
+- `## Tech Stack` — `<!-- Fill in or run /supermind-init to auto-detect -->`
+- `## Project Structure` — `<!-- Fill in or run /supermind-init to auto-detect -->`
+
+**Complete sections** (copy from current, fix naming):
+- `## Shell & Git Permissions` — keep current content, it's accurate
+- `## Worktree Development Workflow` — keep current content
+- `## MCP Servers` — keep current content
+- `## UI Changes` — keep current content
+
+**Updated section:**
+- `## Living Documentation` — rewrite to explain:
+  - Session-start hook automatically reads ARCHITECTURE.md and DESIGN.md at conversation start
+  - After code changes, update ARCHITECTURE.md if files/APIs/deps/env vars changed
+  - After design changes, update DESIGN.md if colors/fonts/spacing/components changed
+  - Run `/supermind-living-docs` to manually sync docs with recent changes
+  - If ARCHITECTURE.md is missing, run `/supermind-init` to create one
+
+Fix ALL occurrences of `/supermind:init` to `/supermind-init` and `/supermind:living-docs` to `/supermind-living-docs`.
 
 - [ ] **Step 2: Commit**
 
@@ -1375,18 +1541,59 @@ git commit -m "Rewrite CLAUDE.md template with Supermind branding"
 - Rewrite: `README.md`
 - Create: `CHANGELOG.md`
 
-- [ ] **Step 1: Rewrite CLAUDE.md (for the Supermind repo itself)**
+- [ ] **Step 1: Read current CLAUDE.md and rewrite**
 
-Per spec Section 9.4:
-- Project overview (what Supermind is, npm package structure)
-- File organization guide (cli/ for installer, hooks/ for runtime hooks, skills/ for SKILL.md files, templates/ for project templates)
-- Development rules (worktree workflow, versioning, changelog updates)
-- Release checklist (version bump in package.json, update CHANGELOG.md, test with `node cli/index.js doctor`, commit, publish)
-- Keep existing Git Permissions, Worktree Workflow, MCP Servers, Living Documentation sections
+Read current `CLAUDE.md` (98 lines). Rewrite for the Supermind repo itself. Keep these sections from current:
+- Shell & Git Permissions (with bash-permissions.js reference)
+- Worktree Development Workflow
+- MCP Servers
+- Living Documentation
+
+Add/update these sections:
+- `## Project Overview` — Supermind is an npm package providing a complete Claude Code setup. Explain the file organization: cli/ (installer), hooks/ (runtime hooks copied to ~/.claude/hooks/), skills/ (SKILL.md files copied to ~/.claude/skills/), templates/ (CLAUDE.md template)
+- `## Development Workflow` — Use worktree workflow. When making changes: create worktree → implement → review → fix → merge. Claude handles version bump in package.json and CHANGELOG.md updates.
+- `## Release Checklist` — 1) Bump version in package.json 2) Update CHANGELOG.md 3) Test with `node cli/index.js --version` and `node cli/index.js doctor` 4) Commit 5) `npm publish` (requires user approval)
+- `## Versioning` — Patch for fixes, minor for features, major for breaking changes
 
 - [ ] **Step 2: Rewrite README.md**
 
-Per spec Section 13 structure. Focus on quick install UX.
+Read current `README.md`. Rewrite with Supermind branding and npm-first install UX:
+
+```markdown
+# Supermind
+
+Complete, opinionated Claude Code setup.
+
+## Quick Install
+
+\`\`\`bash
+npx supermind-claude
+\`\`\`
+
+## What Gets Installed
+[table: Component | Location | Purpose — hooks, skills, plugins, settings, templates]
+
+## Project Setup
+[explain /supermind-init for project-level onboarding]
+
+## Living Documentation
+[explain auto-read hook + /supermind-living-docs manual sync]
+
+## Status Line
+[describe the two-line terminal display]
+
+## MCP Servers
+[Docker vs Direct mode, what servers are included]
+
+## Commands
+[table: npx supermind-claude install/update/doctor/uninstall]
+
+## Platforms
+[Windows, macOS, Linux — Node.js >= 18 required]
+
+## Troubleshooting
+[npx supermind-claude doctor, common issues]
+```
 
 - [ ] **Step 3: Create CHANGELOG.md**
 
@@ -1438,12 +1645,11 @@ git commit -m "Rewrite repo docs: CLAUDE.md, README.md, CHANGELOG.md"
 - [ ] **Step 1: Delete obsolete files**
 
 ```bash
-git rm setup.sh update.sh hooks.json VERSION SETUP.md settings.json
-git rm RESEARCH-PROMPT.md OPTIMAL-SETUP-REPORT.md
-git rm -r research/
+git rm --ignore-unmatch setup.sh update.sh hooks.json VERSION SETUP.md settings.json RESEARCH-PROMPT.md OPTIMAL-SETUP-REPORT.md
+git rm -r --ignore-unmatch research/
 ```
 
-Note: Some of these may already be tracked, some may not. Use `git rm` for tracked files and regular `rm` for untracked.
+Use `--ignore-unmatch` since some files may be untracked or already deleted. Check `git status` first to see what's tracked vs untracked.
 
 - [ ] **Step 2: Update .gitignore**
 
