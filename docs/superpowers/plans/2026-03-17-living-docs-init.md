@@ -261,6 +261,7 @@ Run the deep scan scoped to `scan_root`. Follow these rules:
 | Tech stack | Read package.json, Cargo.toml, go.mod, requirements.txt, Gemfile, pyproject.toml; infer from file extensions | **Tech Stack** — table with category, technology, purpose |
 | API routes | Find route/endpoint definitions (Next.js app/api/, Express router, FastAPI decorators, etc.) | **API Contracts** — table with method, route, request, response, purpose |
 | Environment variables | Read .env.example, docker-compose.yml, grep for `process.env`, `os.environ`, etc. | **Environment Variables** — table with variable, required, purpose |
+| Data models | Type definitions, schemas, ORM models | **File Index** — referenced with purpose descriptions |
 | Import graph | Read import/require statements in key files | **Dependencies & Data Flow** — dependency table + ASCII data flow diagram |
 | Code patterns | Observe error handling, naming conventions, file organization | **Key Patterns & Conventions** — bullet list |
 
@@ -375,7 +376,14 @@ Replace lines 21-26 with:
 
 - [ ] **Step 6: Update "After Code Changes" section**
 
-Replace all occurrences of `architecture.md` with `ARCHITECTURE.md` in lines 28-36.
+Change line 30 from:
+```
+Update `architecture.md` if you:
+```
+To:
+```
+Update `ARCHITECTURE.md` if you:
+```
 
 - [ ] **Step 7: Update "After Design Changes" section**
 
@@ -547,7 +555,48 @@ git commit -m "Rename architecture.md to ARCHITECTURE.md in README and SETUP"
 
 ---
 
-### Task 8: Final verification
+### Task 8: Update setup.sh and SETUP.md installation table
+
+**Files:**
+- Modify: `setup.sh:76-80`
+- Modify: `SETUP.md:35`
+
+- [ ] **Step 1: Read setup.sh skill installation section**
+
+Read `setup.sh` around lines 73-81 to confirm current content.
+
+- [ ] **Step 2: Add living-docs/init skill installation**
+
+After line 77 (`echo "  Installed living-docs skill"`), add:
+
+```bash
+mkdir -p "$SKILLS_DIR/living-docs/init"
+cp "$SCRIPT_DIR/skills/living-docs/init/SKILL.md" "$SKILLS_DIR/living-docs/init/SKILL.md"
+cp "$SCRIPT_DIR/skills/living-docs/init/architecture-template.md" "$SKILLS_DIR/living-docs/init/architecture-template.md"
+cp "$SCRIPT_DIR/skills/living-docs/init/design-template.md" "$SKILLS_DIR/living-docs/init/design-template.md"
+echo "  Installed living-docs:init skill"
+```
+
+- [ ] **Step 3: Add new skill files to SETUP.md installation table**
+
+After the existing line 35 (`| skills/living-docs/SKILL.md | ... |`), add:
+
+```markdown
+| `skills/living-docs/init/SKILL.md` | `~/.claude/skills/living-docs/init/` | Creates AI-optimized ARCHITECTURE.md and DESIGN.md |
+| `skills/living-docs/init/architecture-template.md` | `~/.claude/skills/living-docs/init/` | Skeleton template for ARCHITECTURE.md |
+| `skills/living-docs/init/design-template.md` | `~/.claude/skills/living-docs/init/` | Skeleton template for DESIGN.md |
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add setup.sh SETUP.md
+git commit -m "Add living-docs:init skill to setup.sh installation and SETUP.md file table"
+```
+
+---
+
+### Task 9: Final verification
 
 - [ ] **Step 1: Verify all new files exist**
 
@@ -561,8 +610,8 @@ Expected: Only uppercase `ARCHITECTURE.md` matches (case-sensitive grep for lowe
 
 - [ ] **Step 3: Verify git log shows clean commit history**
 
-Run: `git log --oneline -8`
-Expected: 7 new commits, one per task
+Run: `git log --oneline -9`
+Expected: 8 new commits, one per task (Tasks 1-8)
 
 - [ ] **Step 4: Run spec compliance check**
 
