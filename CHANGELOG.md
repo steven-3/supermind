@@ -3,16 +3,16 @@
 ## [2.1.0] - 2026-03-18
 
 ### Added
-- Auto-approve `base64` and `claude` CLI subcommands (config/mcp/plugin) in bash-permissions hook
-- Block implicit `gh api` POST mutations (via `-f`/`-F`/`--field`/`--input` flags)
-- Default plugins: pr-review-toolkit, hookify, security-guidance, elements-of-style
-- /supermind-init now creates `.serena/` directory automatically instead of just suggesting it
+- bash-permissions hook: auto-approve `base64` and `claude` CLI subcommands (config/mcp/plugin)
+- bash-permissions hook: block implicit `gh api` POST mutations (via `-f`/`-F`/`--field`/`--input` flags)
+- Default installed plugins: pr-review-toolkit, hookify, security-guidance, elements-of-style
+- /supermind-init skill: create `.serena/` directory automatically instead of just suggesting it
 
 ### Changed
-- /supermind-init tool discovery now dispatches two parallel agents (skills + MCPs) instead of one
-- /supermind-init explicitly prevents sequential-thinking-mcp from being recommended
-- /supermind-init now includes explicit guard against writing to `~/.claude/templates/CLAUDE.md`
-- Template CLAUDE.md updated to document new auto-approved commands
+- /supermind-init skill: tool discovery dispatches two parallel agents (skills + MCPs) instead of one
+- /supermind-init skill: exclude sequential-thinking-mcp from recommendations
+- /supermind-init skill: explicit guard against writing to template source (`~/.claude/templates/CLAUDE.md`)
+- Template `~/.claude/templates/CLAUDE.md`: document new auto-approved commands and gh api protections
 
 ## [2.0.2] - 2026-03-18
 
