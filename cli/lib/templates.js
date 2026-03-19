@@ -36,7 +36,8 @@ Use these naturally when relevant — don't wait to be asked.
 <!-- Add your MCP servers here. Run \`npx supermind-claude\` to set up context7, playwright, serena, tavily, and more. -->`,
 };
 
-const MCP_SECTION_PATTERN = /## MCP Servers\nUse these naturally when relevant.*?(?=\n## |\n$)/s;
+// Matches MCP section up to next heading or end of file (with or without trailing newline)
+const MCP_SECTION_PATTERN = /## MCP Servers\nUse these naturally when relevant.*?(?=\n## |\n?$)/s;
 
 function installTemplates(mcpMode) {
   ensureDir(PATHS.templatesDir);
@@ -45,9 +46,12 @@ function installTemplates(mcpMode) {
   fs.copyFileSync(src, dest);
 
   if (mcpMode && MCP_SECTIONS[mcpMode]) {
-    let content = fs.readFileSync(dest, 'utf-8');
-    content = content.replace(MCP_SECTION_PATTERN, MCP_SECTIONS[mcpMode]);
-    fs.writeFileSync(dest, content);
+    const content = fs.readFileSync(dest, 'utf-8');
+    const updated = content.replace(MCP_SECTION_PATTERN, MCP_SECTIONS[mcpMode]);
+    if (updated === content && mcpMode !== 'docker') {
+      logger.warn('MCP section pattern did not match template — using default MCP content');
+    }
+    fs.writeFileSync(dest, updated);
   }
 
   logger.success('CLAUDE.md template');
