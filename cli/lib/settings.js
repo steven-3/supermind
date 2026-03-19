@@ -3,16 +3,21 @@
 const fs = require('fs');
 const { PATHS } = require('./platform');
 const logger = require('./logger');
-const { getPluginDefaults } = require('./plugins');
-
 // Known Supermind hook filenames — used to identify owned entries
 const SUPERMIND_HOOKS = [
   'bash-permissions.js', 'session-start.js', 'session-end.js',
   'cost-tracker.js', 'statusline-command.js',
 ];
 
-// Derived from plugins.js — single source of truth for plugin IDs
-const SUPERMIND_PLUGINS = Object.keys(getPluginDefaults().enabledPlugins);
+// Derived from plugins.js — single source of truth for plugin IDs.
+// Wrapped in try-catch so a plugins.js error doesn't crash doctor/uninstall.
+let SUPERMIND_PLUGINS;
+try {
+  const { getPluginDefaults } = require('./plugins');
+  SUPERMIND_PLUGINS = Object.keys(getPluginDefaults().enabledPlugins);
+} catch {
+  SUPERMIND_PLUGINS = [];
+}
 
 function readSettings() {
   try {

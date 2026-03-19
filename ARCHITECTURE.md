@@ -100,7 +100,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `cli/lib/skills.js` | fs, path, platform, logger | install, update, doctor, uninstall |
 | `cli/lib/templates.js` | fs, path, platform, logger | install, uninstall |
 | `cli/lib/mcp.js` | fs, path, readline, child_process, platform, logger | install |
-| `cli/lib/plugins.js` | (none) | install |
+| `cli/lib/plugins.js` | (none) | install, settings |
 | `hooks/bash-permissions.js` | fs, path, os | Runtime (PreToolUse) |
 | `hooks/session-start.js` | fs, path, os | Runtime (SessionStart) |
 | `hooks/session-end.js` | fs, path, os, child_process | Runtime (Stop) |
