@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1] - 2026-03-19
+
+### Fixed
+- Template CLAUDE.md now renders correct MCP section based on install mode (docker/direct/skip) instead of hardcoding AIRIS gateway
+- Update command auto-detects existing MCP mode via installed artifacts
+- Branch safety rule added to template: auto-create feature branches when on main/master
+
 ## [2.1.0] - 2026-03-18
 
 ### Added

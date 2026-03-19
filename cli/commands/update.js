@@ -7,6 +7,7 @@ const { readSettings, writeSettings, mergeSettings, backupSettings } = require('
 const { installHooks, getHookSettings } = require('../lib/hooks');
 const { installSkills, removeLegacySkills } = require('../lib/skills');
 const { installTemplates } = require('../lib/templates');
+const { detectMcpMode } = require('../lib/mcp');
 const { version } = require('../../package.json');
 
 module.exports = function update(flags) {
@@ -44,7 +45,7 @@ module.exports = function update(flags) {
 
   // Step 4: Templates
   logger.step(4, TOTAL, 'Updating templates...');
-  installTemplates();
+  installTemplates(detectMcpMode());
 
   // Write version marker
   fs.writeFileSync(PATHS.versionFile, version);

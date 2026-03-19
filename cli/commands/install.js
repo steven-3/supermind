@@ -72,7 +72,7 @@ module.exports = async function install(flags) {
 
   // Step 7: Templates
   logger.step(7, TOTAL, 'Installing templates...');
-  installTemplates();
+  installTemplates(mcpConfig.mode);
 
   // Write version marker
   fs.writeFileSync(PATHS.versionFile, version);

@@ -91,22 +91,42 @@ async function setupMcp(flags) {
   }
   if (!mode || mode === 'skip') {
     logger.info('Skipping MCP setup');
-    return {};
+    return { mode: 'skip' };
   }
 
   if (mode === 'docker') {
     await setupDocker();
-    return {}; // Docker mode uses AIRIS, not settings.json mcpServers
+    return { mode: 'docker' }; // Docker uses AIRIS gateway; mode drives template MCP section
   }
 
   if (mode === 'direct') {
     const apiKeys = await promptApiKeys(flags);
     const servers = setupDirect(apiKeys);
     logger.success(`Configured ${Object.keys(servers).length} MCP servers`);
-    return { mcpServers: servers };
+    return { mode: 'direct', mcpServers: servers };
   }
 
-  return {};
+  return { mode: 'skip' };
 }
 
-module.exports = { setupMcp };
+// Infer MCP mode from installed artifacts. Used by update to re-render the template MCP section.
+function detectMcpMode() {
+  if (fs.existsSync(path.join(PATHS.airisDir, 'docker-compose.yml'))) {
+    return 'docker';
+  }
+  // Any known direct-mode server in settings.json means direct install was used
+  try {
+    const settings = JSON.parse(fs.readFileSync(PATHS.settings, 'utf-8'));
+    const servers = settings.mcpServers || {};
+    if (servers.context7 || servers.playwright || servers.serena || servers.tavily) {
+      return 'direct';
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      logger.warn(`Could not read settings.json to detect MCP mode: ${err.message}`);
+    }
+  }
+  return 'skip';
+}
+
+module.exports = { setupMcp, detectMcpMode };
