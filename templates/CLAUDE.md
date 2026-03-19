@@ -74,7 +74,7 @@ Use the superpowers `/using-git-worktrees` skill for worktree creation. It handl
 ### Rules
 
 - The worktree branch must always be created from and merged back into the **same branch** — the one you are currently on locally. Never merge into a different branch.
-- `git merge`, `git worktree remove`, and `git branch -d` are auto-approved **only** within this worktree workflow. In all other contexts, these still require user approval.
+- `git merge`, `git worktree remove`, `git worktree prune`, and `git branch -d` are auto-approved **only** within this worktree workflow. In all other contexts, these still require user approval.
 - The code reviewer must find zero remaining issues before merging. If it finds problems, fix them and run the reviewer again. Repeat until clean.
 - Never skip the review step. Never skip "minor" fixes. Every finding gets fixed.
 - This entire process — create, implement, review, fix, merge, clean up — executes without stopping to ask for permission.
