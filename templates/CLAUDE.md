@@ -24,9 +24,10 @@ A PreToolUse hook (`bash-permissions.js`) handles all Bash permission classifica
 **Auto-approved** (standalone or in any compound):
 - **Read-only shell**: ls, cat, head, tail, find, sed (without -i), grep, echo, pwd, jq, etc.
 - **Safe writes**: mkdir, touch, cp, mv
+- **Utilities**: base64, python3, claude CLI
 - **Read-only git**: status, diff, log, show, blame, rev-parse, check-ignore, branch listing, tag listing, config
 - **Non-destructive git writes**: add, commit, stash (push/save/list/show), worktree add, worktree list, branch create
-- **gh CLI**: read-only gh commands (pr list/view/diff, issue list/view, repo view, etc. — not merge, close, delete)
+- **gh CLI**: read-only gh commands (pr list/view/diff, issue list/view, repo view, gh api GET — not merge, close, delete, or mutating API calls)
 
 **Worktree-only** (auto-approved only when `cd` targets a `.worktrees/` path or CWD is inside one):
 - git merge, git worktree remove, git branch -d

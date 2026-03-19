@@ -31,9 +31,9 @@ Section-level merging preserves your project-specific customizations while keepi
 
 ### Steps
 
-1. Read the template from `~/.claude/templates/CLAUDE.md`. If missing, tell the user to run `npx supermind-claude` first and stop.
+1. Read the template from `~/.claude/templates/CLAUDE.md`. If missing, tell the user to run `npx supermind-claude` first and stop. **Important:** The template is only a *source* to read from — all writes go to `./CLAUDE.md` in the project root. Never modify the template file at `~/.claude/templates/CLAUDE.md`.
 
-2. Check if `CLAUDE.md` exists in the project root.
+2. Check if `CLAUDE.md` exists in the project root (`./CLAUDE.md`).
 
 3. **No existing CLAUDE.md** — copy the template as-is, then proceed to step 5.
 
@@ -147,19 +147,30 @@ Different projects benefit from different tools. A database-heavy project might 
        - Check `~/.claude/sessions/` for recent session files
        - If no recent files found, warn that session persistence may not be configured
 
-    b. **Check Serena configuration**:
-       - Look for `.serena/` directory in the project root
-       - If missing, suggest setting up Serena for semantic code navigation
+    b. **Set up Serena** (semantic code navigation):
+       - Check if `.serena/` directory exists in the project root
+       - If missing, create it: `mkdir -p .serena/memories`
+       - Verify `.serena/` is in `.gitignore` — if not, add it and commit
+       - Tell the user: "Created `.serena/` for semantic code navigation. Serena will be available via MCP for find-definition, find-references, and rename refactoring."
 
-    c. **Research relevant tools**:
-       - Spawn a subagent to research skills and MCPs relevant to the detected tech stack
-       - Consider the project's language, framework, database, deployment target, and testing approach
-       - Look at available MCP servers and Superpowers skills that match
+    c. **Research relevant tools** — dispatch **two parallel agents**:
 
-    d. **Present findings**:
-       - Show suggestions as a list with brief explanations of why each tool is relevant
+       **Agent 1: Skills research**
+       - Search for Superpowers skills and Claude plugins relevant to the detected tech stack
+       - Consider the project's language, framework, testing approach, and deployment target
+       - Check installed vs. available skills and identify gaps
+
+       **Agent 2: MCP servers research**
+       - Search for MCP servers relevant to the detected tech stack
+       - Consider database, API, deployment, and tooling needs
+       - Check installed vs. available MCPs and identify gaps
+       - **Exclusion:** Never recommend `sequential-thinking-mcp` — it is incompatible with Supermind's skill system
+
+    d. **Present findings** (after both agents complete):
+       - Combine results from both agents into a unified list
+       - Show suggestions grouped by category: code navigation, testing, deployment, UI, database, etc.
+       - Include a brief explanation of why each tool is relevant to this project
        - Do not auto-install anything — let the user decide
-       - Group by category: code navigation, testing, deployment, UI, database, etc.
 
 16. **If no**: skip this phase. Initialization is complete.
 

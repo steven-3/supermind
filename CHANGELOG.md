@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1.0] - 2026-03-18
+
+### Added
+- Auto-approve `python3`, `base64`, and `claude` CLI commands in bash-permissions hook
+- Default plugins: pr-review-toolkit, hookify, security-guidance, elements-of-style
+- /supermind-init now creates `.serena/` directory automatically instead of just suggesting it
+
+### Changed
+- /supermind-init tool discovery now dispatches two parallel agents (skills + MCPs) instead of one
+- /supermind-init explicitly prevents sequential-thinking-mcp from being recommended
+- /supermind-init now includes explicit guard against writing to `~/.claude/templates/CLAUDE.md`
+- Template CLAUDE.md updated to document new auto-approved commands
+
 ## [2.0.2] - 2026-03-18
 
 ### Changed
