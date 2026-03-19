@@ -9,14 +9,19 @@ const SUPERMIND_HOOKS = [
   'cost-tracker.js', 'statusline-command.js',
 ];
 
-// Derived from plugins.js — single source of truth for plugin IDs.
+// Derived from plugins.js — single source of truth for plugin and marketplace IDs.
 // Wrapped in try-catch so a plugins.js error doesn't crash doctor/uninstall.
 let SUPERMIND_PLUGINS;
+let SUPERMIND_MARKETPLACES;
 try {
   const { getPluginDefaults } = require('./plugins');
-  SUPERMIND_PLUGINS = Object.keys(getPluginDefaults().enabledPlugins);
-} catch {
+  const defaults = getPluginDefaults();
+  SUPERMIND_PLUGINS = Object.keys(defaults.enabledPlugins);
+  SUPERMIND_MARKETPLACES = Object.keys(defaults.extraKnownMarketplaces);
+} catch (err) {
   SUPERMIND_PLUGINS = [];
+  SUPERMIND_MARKETPLACES = [];
+  logger.warn(`Could not load plugins.js — plugin checks/cleanup will be skipped (${err.message})`);
 }
 
 function readSettings() {
@@ -128,7 +133,9 @@ function removeSupermindEntries(settings) {
 
   // Remove Supermind marketplace entries
   if (result.extraKnownMarketplaces) {
-    delete result.extraKnownMarketplaces['ui-ux-pro-max-skill'];
+    for (const id of SUPERMIND_MARKETPLACES) {
+      delete result.extraKnownMarketplaces[id];
+    }
   }
 
   // Remove Supermind hooks from each event
