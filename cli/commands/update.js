@@ -3,7 +3,7 @@
 const fs = require('fs');
 const { PATHS } = require('../lib/platform');
 const logger = require('../lib/logger');
-const { readSettings, writeSettings, mergeSettings } = require('../lib/settings');
+const { readSettings, writeSettings, mergeSettings, backupSettings } = require('../lib/settings');
 const { installHooks, getHookSettings } = require('../lib/hooks');
 const { installSkills, removeLegacySkills } = require('../lib/skills');
 const { installTemplates } = require('../lib/templates');
@@ -30,6 +30,7 @@ module.exports = function update(flags) {
 
   // Step 2: Hook settings (re-merge to pick up any new hooks)
   logger.step(2, TOTAL, 'Updating settings...');
+  backupSettings();
   const existing = readSettings();
   const hookSettings = getHookSettings();
   const merged = mergeSettings(existing, hookSettings);

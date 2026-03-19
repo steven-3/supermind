@@ -17,13 +17,24 @@ function loadApprovedCommands() {
   try {
     const data = JSON.parse(fs.readFileSync(APPROVED_FILE, 'utf-8'));
     return Array.isArray(data) ? data : [];
-  } catch {
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      process.stderr.write(`[bash-permissions] Could not load approved commands: ${err.message}\n`);
+    }
     return [];
   }
 }
 
+let _approvedCache;
+function getApprovedCommands() {
+  if (_approvedCache === undefined) {
+    _approvedCache = loadApprovedCommands();
+  }
+  return _approvedCache;
+}
+
 function isUserApproved(cmd) {
-  const approved = loadApprovedCommands();
+  const approved = getApprovedCommands();
   const trimmed = cmd.trim();
   for (const pattern of approved) {
     // Exact match
@@ -34,7 +45,9 @@ function isUserApproved(cmd) {
     if (pattern.startsWith('/') && pattern.endsWith('/')) {
       try {
         if (new RegExp(pattern.slice(1, -1)).test(trimmed)) return true;
-      } catch { /* invalid regex, skip */ }
+      } catch (e) {
+        process.stderr.write(`[bash-permissions] Invalid regex in approved commands: ${pattern} (${e.message})\n`);
+      }
     }
   }
   return false;
@@ -51,9 +64,9 @@ const SAFE_READ_COMMANDS = [
   "echo", "printf", "pwd", "true", "false", "set", "export",
   "cd", "pushd", "popd", "source", ".",
   // Text processing (read-only)
-  "grep", "rg", "awk", "sort", "uniq", "cut", "tr", "tee",
+  "grep", "rg", "awk", "sort", "uniq", "cut", "tr",
   "diff", "comm", "paste", "column", "fmt", "fold", "rev",
-  "jq", "yq", "xargs",
+  "jq", "yq",
   // System info
   "uname", "whoami", "hostname", "date", "env", "printenv",
   "nproc", "free", "uptime", "id",
@@ -68,17 +81,15 @@ const SAFE_READ_COMMANDS = [
   "npx jest", "npx tsx", "npx ts-node",
 ];
 
-// Prefix-matched safe commands (not just first word)
+// Prefix-matched safe syntax (bash conditionals)
 const SAFE_PREFIXES = [
-  "sed -n",        // read-only sed
-  "sed -e",        // expression sed (read-only when no -i)
   "[[ ",           // bash conditional
   "[ ",            // test
 ];
 
 // Safe write commands (mkdir, touch, etc.) — still checked against DANGEROUS_PATTERNS
 const SAFE_WRITE_COMMANDS = [
-  "mkdir", "touch", "cp", "mv",
+  "mkdir", "touch", "cp", "mv", "tee", "xargs",
 ];
 
 // ─── Git classification lists ────────────────────────────────────────────────
@@ -185,7 +196,7 @@ function classifyGitCommand(cmd, { inWorktree = false } = {}) {
   }
 
   // Bare "git stash" (no subcommand) is safe — equivalent to stash push
-  if (gitCmd === "stash" || /^stash\s*$/.test(gitCmd)) return "allow";
+  if (/^stash\s*$/.test(gitCmd)) return "allow";
 
   // Dangerous patterns (--force, --hard, rm, etc.)
   for (const p of DANGEROUS_PATTERNS) {
@@ -216,6 +227,7 @@ function classifyGitCommand(cmd, { inWorktree = false } = {}) {
 
 function isSedSafe(cmd) {
   // sed is safe only when it does NOT have -i (in-place edit)
+  // Note: conservative match — may flag -i in filenames/patterns, which errs on the side of asking
   return /^sed\s/.test(cmd) && !/-i/.test(cmd);
 }
 
@@ -239,7 +251,7 @@ function classifySegment(raw, { inWorktree = false } = {}) {
   // sed special handling (safe only without -i)
   if (withoutEnv.startsWith("sed ")) return isSedSafe(withoutEnv) ? "allow" : "ask";
 
-  // Safe prefixes (sed -n, [[ , etc.)
+  // Safe prefixes ([[ , [ conditionals)
   for (const p of SAFE_PREFIXES) {
     if (withoutEnv.startsWith(p)) return "allow";
   }
@@ -280,10 +292,6 @@ function detectWorktreeContext(segments) {
     }
     // git worktree remove targeting a .worktrees/ path
     if (/git\s+worktree\s+remove\s+.*\.worktrees?[/\\]/.test(trimmed)) {
-      return true;
-    }
-    // git worktree remove with a relative .worktrees path
-    if (/git\s+worktree\s+remove\s+\.worktrees?[/\\]/.test(trimmed)) {
       return true;
     }
   }
@@ -422,6 +430,9 @@ function main() {
       console.log(JSON.stringify(output));
     } catch (err) {
       // On parse error, don't block — let the normal permission system handle it
+      if (!(err instanceof SyntaxError)) {
+        process.stderr.write(`[bash-permissions] Unexpected error: ${err.stack || err.message}\n`);
+      }
       console.log(JSON.stringify({
         hookSpecificOutput: {
           hookEventName: "PreToolUse",

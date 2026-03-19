@@ -4,7 +4,7 @@ const fs = require('fs');
 const readline = require('readline');
 const { PATHS } = require('../lib/platform');
 const logger = require('../lib/logger');
-const { readSettings, writeSettings, removeSupermindEntries } = require('../lib/settings');
+const { readSettings, writeSettings, removeSupermindEntries, backupSettings } = require('../lib/settings');
 const { removeHooks } = require('../lib/hooks');
 const { removeSkills } = require('../lib/skills');
 const { removeTemplates } = require('../lib/templates');
@@ -41,6 +41,7 @@ module.exports = async function uninstall(flags) {
 
   // Clean settings
   console.log('  Cleaning settings...');
+  backupSettings();
   const settings = readSettings();
   const cleaned = removeSupermindEntries(settings);
   writeSettings(cleaned);

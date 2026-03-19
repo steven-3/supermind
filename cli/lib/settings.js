@@ -3,6 +3,7 @@
 const fs = require('fs');
 const { PATHS } = require('./platform');
 const logger = require('./logger');
+
 // Known Supermind hook filenames — used to identify owned entries
 const SUPERMIND_HOOKS = [
   'bash-permissions.js', 'session-start.js', 'session-end.js',
@@ -11,29 +12,40 @@ const SUPERMIND_HOOKS = [
 
 // Derived from plugins.js — single source of truth for plugin and marketplace IDs.
 // Wrapped in try-catch so a plugins.js error doesn't crash doctor/uninstall.
-let SUPERMIND_PLUGINS;
-let SUPERMIND_MARKETPLACES;
-try {
-  const { getPluginDefaults } = require('./plugins');
-  const defaults = getPluginDefaults();
-  SUPERMIND_PLUGINS = Object.keys(defaults.enabledPlugins);
-  SUPERMIND_MARKETPLACES = Object.keys(defaults.extraKnownMarketplaces);
-} catch (err) {
-  SUPERMIND_PLUGINS = [];
-  SUPERMIND_MARKETPLACES = [];
-  logger.warn(`Could not load plugins.js — plugin checks/cleanup will be skipped (${err.message})`);
+function loadPluginIds() {
+  try {
+    const { getPluginDefaults } = require('./plugins');
+    const defaults = getPluginDefaults();
+    return {
+      plugins: Object.keys(defaults.enabledPlugins),
+      marketplaces: Object.keys(defaults.extraKnownMarketplaces),
+    };
+  } catch (err) {
+    logger.warn(`Could not load plugins.js — plugin checks/cleanup will be skipped (${err.message})`);
+    return { plugins: [], marketplaces: [] };
+  }
 }
+
+const { plugins: SUPERMIND_PLUGINS, marketplaces: SUPERMIND_MARKETPLACES } = loadPluginIds();
+// SUPERMIND_MARKETPLACES is used only within this module (for uninstall cleanup) — intentionally not exported
 
 function readSettings() {
   try {
     return JSON.parse(fs.readFileSync(PATHS.settings, 'utf-8'));
-  } catch {
+  } catch (err) {
+    if (err.code === 'ENOENT') return {};
+    logger.warn(`Failed to read settings.json: ${err.message}`);
     return {};
   }
 }
 
 function writeSettings(settings) {
-  fs.writeFileSync(PATHS.settings, JSON.stringify(settings, null, 2) + '\n');
+  try {
+    fs.writeFileSync(PATHS.settings, JSON.stringify(settings, null, 2) + '\n');
+  } catch (err) {
+    logger.error(`Could not write settings.json: ${err.message}`);
+    throw err;
+  }
 }
 
 function backupSettings() {
@@ -124,17 +136,20 @@ function removeSupermindEntries(settings) {
   // Remove statusLine
   delete result.statusLine;
 
-  // Remove Supermind plugins
-  if (result.enabledPlugins) {
-    for (const id of SUPERMIND_PLUGINS) {
-      delete result.enabledPlugins[id];
+  // Remove Supermind plugins and marketplace entries
+  if (SUPERMIND_PLUGINS.length === 0) {
+    logger.warn('Plugin/marketplace list unavailable — these entries were NOT removed from settings. ' +
+      'You may need to manually edit ~/.claude/settings.json');
+  } else {
+    if (result.enabledPlugins) {
+      for (const id of SUPERMIND_PLUGINS) {
+        delete result.enabledPlugins[id];
+      }
     }
-  }
-
-  // Remove Supermind marketplace entries
-  if (result.extraKnownMarketplaces) {
-    for (const id of SUPERMIND_MARKETPLACES) {
-      delete result.extraKnownMarketplaces[id];
+    if (result.extraKnownMarketplaces) {
+      for (const id of SUPERMIND_MARKETPLACES) {
+        delete result.extraKnownMarketplaces[id];
+      }
     }
   }
 

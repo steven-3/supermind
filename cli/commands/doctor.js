@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { PATHS } = require('../lib/platform');
 const logger = require('../lib/logger');
-const { readSettings, SUPERMIND_PLUGINS } = require('../lib/settings');
+const { SUPERMIND_PLUGINS } = require('../lib/settings');
 const { getHookFiles } = require('../lib/hooks');
 const { getSkillDirs } = require('../lib/skills');
 const { version } = require('../../package.json');
@@ -46,27 +46,43 @@ module.exports = function doctor(flags) {
     try {
       settings = JSON.parse(fs.readFileSync(PATHS.settings, 'utf-8'));
       run('settings.json is valid JSON', true);
-    } catch {
-      run('settings.json is valid JSON', false, 'parse error');
+    } catch (err) {
+      run('settings.json is valid JSON', false, err.message);
     }
   }
 
   // Hooks present
-  const expectedHooks = getHookFiles();
+  let expectedHooks;
+  try {
+    expectedHooks = getHookFiles();
+  } catch (err) {
+    run('Hook enumeration', false, err.message);
+    expectedHooks = [];
+  }
   for (const file of expectedHooks) {
     run(`Hook: ${file}`, fs.existsSync(path.join(PATHS.hooksDir, file)));
   }
 
   // Skills present
-  const expectedSkills = getSkillDirs();
+  let expectedSkills;
+  try {
+    expectedSkills = getSkillDirs();
+  } catch (err) {
+    run('Skill enumeration', false, err.message);
+    expectedSkills = [];
+  }
   for (const dir of expectedSkills) {
     const skillPath = path.join(PATHS.skillsDir, dir);
     run(`Skill: ${dir}`, fs.existsSync(skillPath) && fs.existsSync(path.join(skillPath, 'SKILL.md')));
   }
 
   // Plugins
-  for (const id of SUPERMIND_PLUGINS) {
-    run(`Plugin: ${id.split('@')[0]}`, settings.enabledPlugins?.[id] === true);
+  if (SUPERMIND_PLUGINS.length === 0) {
+    logger.warn('Plugin list unavailable — plugin checks skipped');
+  } else {
+    for (const id of SUPERMIND_PLUGINS) {
+      run(`Plugin: ${id.split('@')[0]}`, settings.enabledPlugins?.[id] === true);
+    }
   }
 
   // Template
@@ -74,12 +90,14 @@ module.exports = function doctor(flags) {
 
   // Sessions directory
   run('Sessions directory writable', (() => {
+    const testFile = path.join(PATHS.sessionsDir, '.doctor-test');
     try {
-      const testFile = path.join(PATHS.sessionsDir, '.doctor-test');
       fs.writeFileSync(testFile, 'test');
-      fs.unlinkSync(testFile);
-      return true;
-    } catch { return false; }
+    } catch {
+      return false;
+    }
+    try { fs.unlinkSync(testFile); } catch { /* cleanup non-critical */ }
+    return true;
   })());
 
   // Docker (warn only, not required)
@@ -93,7 +111,13 @@ module.exports = function doctor(flags) {
 
   // Version
   let installedVersion = 'not found';
-  try { installedVersion = fs.readFileSync(PATHS.versionFile, 'utf-8').trim(); } catch {}
+  try {
+    installedVersion = fs.readFileSync(PATHS.versionFile, 'utf-8').trim();
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      installedVersion = `error: ${err.message}`;
+    }
+  }
   run('Version marker', installedVersion === version, installedVersion !== version ? `installed: ${installedVersion}, package: ${version}` : undefined);
 
   console.log(`\n  ${passed} passed, ${failed} failed\n`);
