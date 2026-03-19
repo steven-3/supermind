@@ -78,6 +78,7 @@ Use the superpowers `/using-git-worktrees` skill for worktree creation. It handl
 - The code reviewer must find zero remaining issues before merging. If it finds problems, fix them and run the reviewer again. Repeat until clean.
 - Never skip the review step. Never skip "minor" fixes. Every finding gets fixed.
 - This entire process — create, implement, review, fix, merge, clean up — executes without stopping to ask for permission.
+- **Branch safety:** If the current branch is `main` or `master` when a code change is requested, create a feature branch first (`feature/…`, `fix/…`, or `chore/…`) before making any changes. Never commit directly to `main` or `master`.
 
 ## MCP Servers
 Use these naturally when relevant — don't wait to be asked.

@@ -87,6 +87,8 @@ Use the superpowers `/using-git-worktrees` skill for worktree creation. It handl
 ## Development Workflow
 All non-trivial changes go through the worktree workflow above. Claude handles version bumps in `package.json` and updates to `CHANGELOG.md` as part of the commit.
 
+**Branch safety:** If the current branch is `main` or `master` when a code change is requested, create a feature branch first (`feature/…`, `fix/…`, or `chore/…`) before making any changes. Never commit directly to `main` or `master`.
+
 ## PR Review Workflow
 
 When `/pr-review-toolkit:review-pr` is invoked, run an **auto-fix loop** instead of just reporting findings:

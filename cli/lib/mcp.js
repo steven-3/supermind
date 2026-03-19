@@ -96,17 +96,33 @@ async function setupMcp(flags) {
 
   if (mode === 'docker') {
     await setupDocker();
-    return {}; // Docker mode uses AIRIS, not settings.json mcpServers
+    return { mode: 'docker' }; // Docker mode uses AIRIS, not settings.json mcpServers
   }
 
   if (mode === 'direct') {
     const apiKeys = await promptApiKeys(flags);
     const servers = setupDirect(apiKeys);
     logger.success(`Configured ${Object.keys(servers).length} MCP servers`);
-    return { mcpServers: servers };
+    return { mode: 'direct', mcpServers: servers };
   }
 
-  return {};
+  return { mode: 'skip' };
 }
 
-module.exports = { setupMcp };
+function detectMcpMode() {
+  // Check if AIRIS docker-compose exists (docker mode was used)
+  if (fs.existsSync(path.join(PATHS.airisDir, 'docker-compose.yml'))) {
+    return 'docker';
+  }
+  // Check if direct MCP servers are in settings.json
+  try {
+    const settings = JSON.parse(fs.readFileSync(PATHS.settings, 'utf-8'));
+    const servers = settings.mcpServers || {};
+    if (servers.context7 || servers.playwright || servers.serena || servers.tavily) {
+      return 'direct';
+    }
+  } catch {}
+  return 'skip';
+}
+
+module.exports = { setupMcp, detectMcpMode };
