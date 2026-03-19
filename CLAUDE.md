@@ -108,7 +108,11 @@ No user approval needed at any step — this runs autonomously like the worktree
 2. Update `CHANGELOG.md`
 3. Test with `node cli/index.js --version` and `node cli/index.js doctor`
 4. Commit
-5. `npm publish` (requires user approval)
+5. After PR is squash-merged into `main`, automatically:
+   - Create git tag: `git tag v<version> && git push origin v<version>`
+   - Create GitHub release: `gh release create v<version>` with notes from CHANGELOG.md
+   - Delete the merged feature branch (local + remote)
+6. `npm publish` (requires user approval)
 
 ## Versioning
 - **Patch** (0.0.x): Bug fixes, typo corrections, minor hook/skill tweaks
