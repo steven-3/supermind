@@ -17,6 +17,9 @@ const PATHS = {
   versionFile: path.join(home, '.claude', '.supermind-version'),
   legacyHooksJson: path.join(home, '.claude', 'hooks.json'),
   airisDir: path.join(home, '.claude', 'airis'),
+  improvementLog: path.join(home, '.claude', 'improvement-log.jsonl'),
+  skillsLock: path.join(home, '.claude', 'skills-lock.json'),
+  approvedCommands: path.join(home, '.claude', 'supermind-approved.json'),
 };
 
 function ensureDir(dirPath) {

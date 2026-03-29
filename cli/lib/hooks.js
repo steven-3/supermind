@@ -33,10 +33,15 @@ function getHookSettings() {
       SessionStart: [{
         hooks: [{ type: 'command', command: `node "${path.join(hooksDir, 'session-start.js')}"`, statusMessage: 'Loading session context...' }],
       }],
+      PostToolUse: [{
+        matcher: 'Bash',
+        hooks: [{ type: 'command', command: `node "${path.join(hooksDir, 'pre-merge-checklist.js')}"`, timeout: 5 }],
+      }],
       Stop: [{
         hooks: [
           { type: 'command', command: `node "${path.join(hooksDir, 'session-end.js')}"`, async: true },
           { type: 'command', command: `node "${path.join(hooksDir, 'cost-tracker.js')}"`, async: true },
+          { type: 'command', command: `node "${path.join(hooksDir, 'improvement-logger.js')}"`, async: true },
         ],
       }],
     },
@@ -48,7 +53,7 @@ function getHookSettings() {
 }
 
 // Fallback list if package source is unavailable
-const KNOWN_HOOKS = ['bash-permissions.js', 'session-start.js', 'session-end.js', 'cost-tracker.js', 'statusline-command.js'];
+const KNOWN_HOOKS = ['bash-permissions.js', 'session-start.js', 'session-end.js', 'cost-tracker.js', 'statusline-command.js', 'pre-merge-checklist.js', 'improvement-logger.js'];
 
 function removeHooks() {
   if (!fs.existsSync(PATHS.hooksDir)) return;

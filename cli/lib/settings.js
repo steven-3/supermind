@@ -8,6 +8,7 @@ const logger = require('./logger');
 const SUPERMIND_HOOKS = [
   'bash-permissions.js', 'session-start.js', 'session-end.js',
   'cost-tracker.js', 'statusline-command.js',
+  'pre-merge-checklist.js', 'improvement-logger.js',
 ];
 
 // Derived from plugins.js — single source of truth for plugin and marketplace IDs.
