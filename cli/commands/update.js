@@ -23,7 +23,7 @@ module.exports = function update(flags) {
     logger.info(`Updating from v${installedVersion} to v${version}...`);
   }
 
-  const TOTAL = 4;
+  const TOTAL = 5;
 
   // Step 1: Hooks
   logger.step(1, TOTAL, 'Updating hooks...');
@@ -46,6 +46,21 @@ module.exports = function update(flags) {
   // Step 4: Templates
   logger.step(4, TOTAL, 'Updating templates...');
   installTemplates(detectMcpMode());
+
+  // Step 5: Vendor skills check
+  logger.step(5, TOTAL, 'Checking vendor skills...');
+  try {
+    const vendorSkills = require('../lib/vendor-skills');
+    const globalLock = vendorSkills.readLockFile('global');
+    const skillCount = Object.keys(globalLock.skills || {}).length;
+    if (skillCount > 0) {
+      logger.info(`${skillCount} vendor skill(s) tracked (run 'supermind skill update --all' to refresh)`);
+    } else {
+      logger.info('No vendor skills installed');
+    }
+  } catch {
+    logger.info('Vendor skill check skipped');
+  }
 
   // Write version marker
   fs.writeFileSync(PATHS.versionFile, version);
