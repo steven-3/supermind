@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const readline = require('readline');
 const { PATHS } = require('../lib/platform');
 const logger = require('../lib/logger');
@@ -47,6 +48,13 @@ module.exports = async function uninstall(flags) {
   writeSettings(cleaned);
   logger.success('Settings cleaned');
 
+  // Remove vendor skills lock file
+  const skillsLockPath = path.join(PATHS.claudeHome, 'skills-lock.json');
+  if (fs.existsSync(skillsLockPath)) {
+    fs.unlinkSync(skillsLockPath);
+    logger.success('Removed vendor skills lock file');
+  }
+
   // Remove version marker
   if (fs.existsSync(PATHS.versionFile)) {
     fs.unlinkSync(PATHS.versionFile);
@@ -68,6 +76,21 @@ module.exports = async function uninstall(flags) {
       if (answer.toLowerCase() === 'y') {
         fs.rmSync(PATHS.airisDir, { recursive: true, force: true });
         logger.success('Removed AIRIS config');
+      }
+    }
+  }
+
+  // Optional: Improvement log
+  const improvementLog = path.join(PATHS.claudeHome, 'improvement-log.jsonl');
+  if (fs.existsSync(improvementLog)) {
+    if (flags.yes || flags.nonInteractive) {
+      fs.unlinkSync(improvementLog);
+      logger.success('Removed improvement log');
+    } else {
+      const answer = await prompt('  Also remove improvement log? [y/N]: ');
+      if (answer.toLowerCase() === 'y') {
+        fs.unlinkSync(improvementLog);
+        logger.success('Removed improvement log');
       }
     }
   }
