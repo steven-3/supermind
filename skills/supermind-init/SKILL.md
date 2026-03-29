@@ -24,7 +24,10 @@ Section-level merging preserves your project-specific customizations while keepi
 
 **Infrastructure** (replaced from template on every run):
 - Shell & Git Permissions
-- Worktree Development Workflow
+- Subagent Strategy
+- Development Lifecycle
+- OpenSpec Workflow
+- Vendor Skills
 - MCP Servers
 - UI Changes
 - Living Documentation
@@ -60,6 +63,50 @@ Section-level merging preserves your project-specific customizations while keepi
    - **Project Structure**: top 2 directory levels, skipping node_modules, dist, .git, .worktrees, build, target, vendor, __pycache__
 
 7. Tell the user what was created or updated and what they should review.
+
+---
+
+## Phase 1.5: Project-Local Config Scaffolding
+
+Generate project-specific Claude Code configuration files to streamline permissions and MCP server setup.
+
+### Steps
+
+7a. **Generate `.claude/settings.local.json`** (only if file does not exist):
+
+   a. Detect project stack from manifest files:
+      - `package.json` present: Node.js stack
+      - `Cargo.toml` present: Rust stack
+      - `go.mod` present: Go stack
+      - `requirements.txt` or `pyproject.toml` present: Python stack
+      - `Gemfile` present: Ruby stack
+
+   b. Build permission allows based on detected stack:
+
+      | Stack | Permissions |
+      |-------|------------|
+      | Node.js | Bash(npm install:*), Bash(npm run:*), Bash(npm test:*), Bash(npx:*), Bash(node:*), Bash(tsc:*) |
+      | Python | Bash(pip install:*), Bash(pytest:*), Bash(python:*), Bash(uv:*) |
+      | Rust | Bash(cargo build:*), Bash(cargo test:*), Bash(cargo run:*), Bash(cargo clippy:*) |
+      | Go | Bash(go build:*), Bash(go test:*), Bash(go run:*), Bash(go vet:*) |
+      | Ruby | Bash(bundle install:*), Bash(bundle exec:*), Bash(rake:*), Bash(rspec:*) |
+
+   c. Always include: `WebSearch`, `mcp__plugin_semgrep-plugin_semgrep__semgrep_scan`
+
+   d. Write the file using the Write tool. Tell the user what was generated.
+
+7b. **Generate `.mcp.json`** (only if file does not exist):
+
+   a. Scan for service indicators in package.json dependencies and .env.example:
+      - `@supabase/supabase-js` -> suggest Supabase MCP
+      - `railway` in scripts -> suggest Railway MCP
+      - Database connection strings -> suggest relevant DB MCP
+
+   b. If indicators found, ask the user which MCP servers to enable.
+
+   c. Write `.mcp.json` with selected servers. If no indicators found, skip this step.
+
+   d. Check if `.mcp.json` should be in `.gitignore` (if it would contain API keys). If so, add it.
 
 ---
 
@@ -136,6 +183,26 @@ ARCHITECTURE.md uses tables-over-prose because it saves tokens — the AI reads 
 14. **Commit** generated or migrated docs:
     - New project: `git commit -m "Initialize project (CLAUDE.md, ARCHITECTURE.md[, DESIGN.md])"`
     - Migrated: `git commit -m "Migrate living documentation to AI-optimized format"`
+
+---
+
+## Phase 2.5: OpenSpec Scaffolding
+
+Set up OpenSpec for structured change management in this project.
+
+### Steps
+
+14a. **Check OpenSpec CLI availability**:
+    - Run `openspec --version` to detect if installed
+    - If installed, report version
+
+14b. **Initialize OpenSpec** (only if `openspec/` directory does not exist):
+    - If CLI available: run `openspec init` in the project root
+    - If CLI not available: create `openspec/changes/` directory manually using mkdir
+    - Add `openspec/changes/archive/` to `.gitignore` if not already present
+    - Tell the user: "OpenSpec initialized. Use `/openspec-propose` to create your first change."
+
+14c. **If OpenSpec directory already exists**: tell the user it is already set up and skip.
 
 ---
 
