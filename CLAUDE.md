@@ -4,18 +4,45 @@
 Supermind is an npm package (`supermind-claude`) providing complete Claude Code setup — hooks, skills, status line, MCP servers, and living documentation.
 
 **File organization:**
-- `cli/` — Installer commands (install, update, doctor, uninstall)
-- `hooks/` — Runtime hooks copied to `~/.claude/hooks/` (session persistence, bash permissions, status line, cost tracking)
-- `skills/` — SKILL.md files copied to `~/.claude/skills/` (supermind-init, supermind-living-docs)
+- `cli/` — Installer commands (install, update, doctor, uninstall, skill, openspec)
+- `cli/lib/` — Shared utilities (paths, settings, hooks, skills, templates, mcp, plugins, logger, vendor-skills, openspec)
+- `hooks/` — Runtime hooks copied to `~/.claude/hooks/` (7 hooks: bash-permissions, session-start, session-end, cost-tracker, statusline, pre-merge-checklist, improvement-logger)
+- `skills/` — SKILL.md files copied to `~/.claude/skills/` (7 dirs: supermind, supermind-init, supermind-living-docs, openspec-propose, openspec-explore, openspec-apply, openspec-archive)
 - `templates/` — CLAUDE.md project template copied to `~/.claude/templates/`
-- `cli/lib/` — Shared utilities (paths, settings builder, file operations)
 
 ## Skill System
 - Superpowers skills are installed and auto-trigger per the using-superpowers meta-skill
 - When I prefix a request with "quick:", skip brainstorming and skill gates
 - Superpowers enforcement takes priority over all other methodology guidance **except** Git Permissions, Shell Permissions, and Worktree Workflow rules in this file — those are enforced by a PreToolUse hook and must not be second-guessed or re-prompted by skills
-- **`/supermind-init`** onboards a project: creates CLAUDE.md, generates ARCHITECTURE.md and DESIGN.md, runs health checks
+- **`/supermind-init`** onboards a project: creates CLAUDE.md, generates ARCHITECTURE.md and DESIGN.md, runs health checks, scaffolds `openspec/` directory
 - **`/supermind-living-docs`** keeps ARCHITECTURE.md and DESIGN.md in sync with code changes (manual trigger)
+- **`/openspec-propose`**, **`/openspec-explore`**, **`/openspec-apply`**, **`/openspec-archive`** — OpenSpec workflow skills
+
+## OpenSpec Integration
+- OpenSpec CLI is detected/installed during `supermind install` (step 8)
+- 4 OpenSpec skills ship with supermind: propose, explore, apply, archive
+- Skills use CLI when available, fall back to manual directory/file creation
+- `/supermind-init` scaffolds `openspec/` directory in new projects
+- `supermind openspec install` — standalone CLI installer
+- `supermind openspec doctor` — check CLI health
+
+## Vendor Skill System
+- `supermind skill add <github-url> [--global]` — install from GitHub repo
+- `supermind skill update [name] [--all]` — refresh from source
+- `supermind skill list` — show installed with source and version
+- `supermind skill remove <name>` — remove skill and lock entry
+- Global lock: `~/.claude/skills-lock.json`, Project lock: `.claude/skills-lock.json`
+
+## Hook Reference
+| Hook | Event | Matcher | Purpose |
+|------|-------|---------|---------|
+| bash-permissions.js | PreToolUse | Bash | Command permission classification |
+| session-start.js | SessionStart | — | Load session + living docs |
+| session-end.js | Stop | — | Save session summary |
+| cost-tracker.js | Stop | — | Log session cost |
+| statusline-command.js | statusLine | — | Two-line terminal display |
+| pre-merge-checklist.js | PostToolUse | Bash | Advisory pre-merge warnings |
+| improvement-logger.js | Stop | — | Session improvement tracking |
 
 ### Auto-trigger: Skill Development Tools
 - When **writing or modifying** files in `skills/` or `hooks/` (SKILL.md content, hook scripts, frontmatter), invoke `working-with-claude-code` to reference the correct schemas and formats
@@ -87,6 +114,8 @@ Use the superpowers `/using-git-worktrees` skill for worktree creation. It handl
 ## Development Workflow
 All non-trivial changes go through the worktree workflow above. Claude handles version bumps in `package.json` and updates to `CHANGELOG.md` as part of the commit.
 
+**6-phase development lifecycle:** Plan → Worktree → Implement → Review → Living Docs → Finish. Each phase is mandatory for non-trivial changes.
+
 **Branch safety:** If the current branch is `main` or `master` when a code change is requested, create a feature branch first (`feature/…`, `fix/…`, or `chore/…`) before making any changes. Never commit directly to `main` or `master`.
 
 ## PR Review Workflow
@@ -115,6 +144,7 @@ After the review passes clean, run the **pre-publish verification** automaticall
 1. Bump version in `package.json`
 2. Update `CHANGELOG.md`
 3. Commit
+3a. Archive any OpenSpec changes used during development: `/openspec-archive`
 4. After PR is squash-merged into `main`, automatically:
    - Create git tag: `git tag v<version> && git push origin v<version>`
    - Create GitHub release: `gh release create v<version>` with notes from CHANGELOG.md
