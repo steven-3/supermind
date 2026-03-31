@@ -5,7 +5,7 @@ const { PATHS, ensureDir } = require('../lib/platform');
 const logger = require('../lib/logger');
 const { readSettings, writeSettings, backupSettings, mergeSettings } = require('../lib/settings');
 const { installHooks, getHookSettings } = require('../lib/hooks');
-const { installSkills, removeLegacySkills } = require('../lib/skills');
+const { installSkills, removeLegacySkills, installAgents } = require('../lib/skills');
 const { setupMcp } = require('../lib/mcp');
 const { installTemplates } = require('../lib/templates');
 const { version } = require('../../package.json');
@@ -19,6 +19,7 @@ module.exports = async function install(flags) {
   ensureDir(PATHS.claudeHome);
   ensureDir(PATHS.hooksDir);
   ensureDir(PATHS.skillsDir);
+  ensureDir(PATHS.agentsDir);
   ensureDir(PATHS.sessionsDir);
   logger.success(`Claude home: ${PATHS.claudeHome}`);
 
@@ -47,11 +48,12 @@ module.exports = async function install(flags) {
   const hookFiles = installHooks();
   logger.info(`${hookFiles.length} hooks installed`);
 
-  // Step 4: Skills
-  logger.step(4, TOTAL, 'Installing skills...');
+  // Step 4: Skills & agents
+  logger.step(4, TOTAL, 'Installing skills and agents...');
   removeLegacySkills();
   const skillDirs = installSkills();
-  logger.info(`${skillDirs.length} skill directories installed`);
+  const agentFiles = installAgents();
+  logger.info(`${skillDirs.length} skill directories, ${agentFiles.length} agent definitions installed`);
 
   // Step 5: MCP servers
   logger.step(5, TOTAL, 'MCP server setup...');

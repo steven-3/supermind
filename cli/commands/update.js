@@ -5,7 +5,7 @@ const { PATHS } = require('../lib/platform');
 const logger = require('../lib/logger');
 const { readSettings, writeSettings, mergeSettings, backupSettings } = require('../lib/settings');
 const { installHooks, getHookSettings } = require('../lib/hooks');
-const { installSkills, removeLegacySkills } = require('../lib/skills');
+const { installSkills, removeLegacySkills, installAgents } = require('../lib/skills');
 const { installTemplates } = require('../lib/templates');
 const { detectMcpMode } = require('../lib/mcp');
 const { version } = require('../../package.json');
@@ -38,10 +38,11 @@ module.exports = function update(flags) {
   writeSettings(merged);
   logger.success('Hook settings refreshed');
 
-  // Step 3: Skills
-  logger.step(3, TOTAL, 'Updating skills...');
+  // Step 3: Skills & agents
+  logger.step(3, TOTAL, 'Updating skills and agents...');
   removeLegacySkills();
   installSkills();
+  installAgents();
 
   // Step 4: Templates
   logger.step(4, TOTAL, 'Updating templates...');

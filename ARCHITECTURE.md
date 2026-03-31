@@ -20,23 +20,23 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | Path | Purpose |
 |------|---------|
 | `cli/index.js` | Entry point — parses argv, routes to commands, handles --help/--version |
-| `cli/commands/install.js` | Full setup: creates ~/.claude dirs, merges settings, installs hooks/skills/MCP/templates |
-| `cli/commands/update.js` | Refreshes hooks, skills, templates; re-merges hook settings; updates version marker |
-| `cli/commands/doctor.js` | Health check: validates Node version, ~/.claude structure, settings, hooks, skills, Docker, vendor skills |
-| `cli/commands/uninstall.js` | Removes all Supermind components from ~/.claude, cleans settings |
+| `cli/commands/install.js` | Full setup: creates ~/.claude dirs, merges settings, installs hooks/skills/agents/MCP/templates |
+| `cli/commands/update.js` | Refreshes hooks, skills, agents, templates; re-merges hook settings; updates version marker |
+| `cli/commands/doctor.js` | Health check: validates Node version, ~/.claude structure, settings, hooks, skills, agents, Docker, vendor skills |
+| `cli/commands/uninstall.js` | Removes all Supermind components (including agents) from ~/.claude, cleans settings |
 | `cli/commands/approve.js` | Manages ~/.claude/supermind-approved.json (add/list/remove auto-approved command patterns) |
 | `cli/commands/skill.js` | Vendor skill management CLI (add/update/list/remove) |
-| `cli/lib/platform.js` | PATHS constant and utilities: ensureDir(), getPackageRoot() |
+| `cli/lib/platform.js` | PATHS constant (including agentsDir) and utilities: ensureDir(), getPackageRoot() |
 | `cli/lib/logger.js` | Color-coded terminal output: banner(), step(), success(), warn(), error(), info() |
 | `cli/lib/settings.js` | Settings I/O: readSettings(), writeSettings(), backupSettings(), mergeSettings(), removeSupermindEntries() |
 | `cli/lib/hooks.js` | Hook lifecycle: installHooks(), getHookSettings(), removeHooks() |
-| `cli/lib/skills.js` | Skill lifecycle: installSkills(), removeSkills(), removeLegacySkills() |
+| `cli/lib/skills.js` | Skill and agent lifecycle: installSkills(), removeSkills(), removeLegacySkills(), installAgents(), removeAgents(), getAgentFiles() |
 | `cli/lib/templates.js` | Template lifecycle: installTemplates(), removeTemplates() |
 | `cli/lib/mcp.js` | MCP server setup: setupMcp(), promptApiKeys(), setupDocker(), setupDirect() |
 | `cli/lib/vendor-skills.js` | Skill fetching, hashing, lock file management (skills-lock.json) |
 | `cli/lib/planning.js` | Planning state management: .planning/ directory CRUD (roadmap, phases, progress, config, research, plans, tasks). Used by Project Mode orchestrator. Path-safe via safeJoin/safeFilenameSegment |
 | `cli/lib/executor.js` | Executor engine: buildTaskPacket (assembles self-contained task packets with spec/context/skills/contract), executeTask (builds Agent tool invocation data), buildWavePlan (topological sort into parallel waves), formatWaveProgress (Markdown progress table), getSkillContent (reads SKILL.md from ~/.claude/skills/ with project fallback). SKILL_MAP maps task types to methodology skills. Path-safe via safeJoin |
-| `cli/lib/agents.js` | Agent prompt templates for Project Mode: RESEARCHER_PROMPTS (4 templates: stack, feature, architecture, pitfall), PLANNER_PROMPT (atomic task plans with dependency graphs), PLAN_CHECKER_PROMPT (validates plans against goals), DEBUGGER_PROMPT (diagnoses executor failures), VERIFIER_PROMPT (checks results against original goal). All return prompt strings |
+| `cli/lib/agents.js` | Agent prompt templates for Project Mode: RESEARCHER_PROMPTS (4 templates: stack, feature, architecture, pitfall), PLANNER_PROMPT (atomic task plans with dependency graphs), PLAN_CHECKER_PROMPT (validates plans against goals), DEBUGGER_PROMPT (diagnoses executor failures), VERIFIER_PROMPT (checks results against original goal), CODE_REVIEWER_PROMPT (structured code review for Verify phase). All return prompt strings |
 | `hooks/bash-permissions.js` | PreToolUse hook — blocklist-based command classification; everything auto-approved except ~15 dangerous patterns. Logs blocked commands to ~/.claude/safety-log.jsonl |
 | `hooks/session-start.js` | SessionStart hook — loads previous session summary, injects ARCHITECTURE.md and DESIGN.md, detects active .planning/ sessions and reports phase/wave progress |
 | `hooks/session-end.js` | Stop hook — saves session context to ~/.claude/sessions/, tracks git branch and modified files |
@@ -55,6 +55,8 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `skills/tdd/SKILL.md` | Strict RED-GREEN-REFACTOR test-driven development — injected into write-feature and write-test executors. Forked from obra/superpowers (MIT) |
 | `skills/systematic-debugging/SKILL.md` | Four-phase root-cause debugging methodology (REPRODUCE → ISOLATE → FIX → VERIFY) — injected into fix-bug executors. Forked from obra/superpowers (MIT) |
 | `skills/brainstorming/SKILL.md` | Pre-implementation design exploration with interactive and assumptions modes — used by orchestrator Discuss phase. Forked from obra/superpowers (MIT), assumptions mode from gsd-build/get-shit-done (MIT) |
+| `skills/code-review/SKILL.md` | Structured code review methodology for the Verify phase — six criteria, three-tier issue classification, anti-performative-agreement. Forked from obra/superpowers (MIT) |
+| `agents/code-reviewer.md` | Agent definition for code reviewer subagent — review-only constraint, structured review output, input template for diff/plan/task_spec |
 | `templates/CLAUDE.md` | Project CLAUDE.md template with infrastructure and placeholder sections |
 | `airis/mcp-config.json` | Direct-mode MCP server configuration (npx/uvx launch commands) |
 | `.env.example` | Environment variable template (TAVILY_API_KEY, TWENTYFIRST_API_KEY) |
@@ -72,6 +74,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 │    ├─ settings.js → backup + merge settings.json                 │
 │    ├─ hooks.js → copy hooks/*.js → ~/.claude/hooks/              │
 │    ├─ skills.js → copy skills/*/ → ~/.claude/skills/             │
+│    ├─ skills.js → copy agents/*.md → ~/.claude/agents/           │
 │    ├─ templates.js → copy templates/ → ~/.claude/templates/      │
 │    └─ mcp.js → setup Docker/direct MCP servers                   │
 │                                                                   │

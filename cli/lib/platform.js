@@ -12,6 +12,7 @@ const PATHS = {
   settingsBackup: path.join(home, '.claude', 'settings.json.backup'),
   hooksDir: path.join(home, '.claude', 'hooks'),
   skillsDir: path.join(home, '.claude', 'skills'),
+  agentsDir: path.join(home, '.claude', 'agents'),
   templatesDir: path.join(home, '.claude', 'templates'),
   sessionsDir: path.join(home, '.claude', 'sessions'),
   versionFile: path.join(home, '.claude', '.supermind-version'),

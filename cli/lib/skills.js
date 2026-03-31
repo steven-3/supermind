@@ -38,7 +38,7 @@ function installSkills() {
 }
 
 // Fallback list if package source is unavailable
-const KNOWN_SKILLS = ['supermind', 'supermind-init', 'supermind-living-docs', 'anti-rationalization', 'verification-before-completion', 'tdd', 'systematic-debugging', 'brainstorming'];
+const KNOWN_SKILLS = ['supermind', 'supermind-init', 'supermind-living-docs', 'anti-rationalization', 'verification-before-completion', 'tdd', 'systematic-debugging', 'brainstorming', 'code-review'];
 
 function removeSkills() {
   let dirs;
@@ -67,4 +67,45 @@ function removeLegacySkills() {
   }
 }
 
-module.exports = { installSkills, removeSkills, removeLegacySkills, getSkillDirs };
+// ---------------------------------------------------------------------------
+// Agent definitions — copied to ~/.claude/agents/ on install
+// ---------------------------------------------------------------------------
+
+const KNOWN_AGENTS = ['code-reviewer'];
+
+function getAgentFiles() {
+  const agentsSource = path.join(getPackageRoot(), 'agents');
+  try {
+    return fs.readdirSync(agentsSource).filter(f =>
+      f.endsWith('.md') && fs.statSync(path.join(agentsSource, f)).isFile()
+    );
+  } catch {
+    return [];
+  }
+}
+
+function installAgents() {
+  ensureDir(PATHS.agentsDir);
+  const agentsSource = path.join(getPackageRoot(), 'agents');
+  const files = getAgentFiles();
+
+  for (const file of files) {
+    fs.copyFileSync(path.join(agentsSource, file), path.join(PATHS.agentsDir, file));
+    logger.success(file);
+  }
+  return files;
+}
+
+function removeAgents() {
+  let files;
+  try { files = getAgentFiles(); } catch { files = KNOWN_AGENTS.map(n => `${n}.md`); }
+  for (const file of files) {
+    const target = path.join(PATHS.agentsDir, file);
+    if (fs.existsSync(target)) {
+      fs.unlinkSync(target);
+      logger.success(`Removed ${file}`);
+    }
+  }
+}
+
+module.exports = { installSkills, removeSkills, removeLegacySkills, getSkillDirs, installAgents, removeAgents, getAgentFiles };

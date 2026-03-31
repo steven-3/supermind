@@ -7,7 +7,7 @@ const { PATHS } = require('../lib/platform');
 const logger = require('../lib/logger');
 const { readSettings, writeSettings, removeSupermindEntries, backupSettings } = require('../lib/settings');
 const { removeHooks } = require('../lib/hooks');
-const { removeSkills } = require('../lib/skills');
+const { removeSkills, removeAgents } = require('../lib/skills');
 const { removeTemplates } = require('../lib/templates');
 
 function prompt(question) {
@@ -32,9 +32,10 @@ module.exports = async function uninstall(flags) {
   console.log('  Removing hooks...');
   removeHooks();
 
-  // Remove skills
-  console.log('  Removing skills...');
+  // Remove skills and agents
+  console.log('  Removing skills and agents...');
   removeSkills();
+  removeAgents();
 
   // Remove templates
   console.log('  Removing templates...');

@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.11.0] - 2026-03-31
+
+### Added
+- **Code review skill** (`skills/code-review/SKILL.md`): structured code review methodology for the Verify phase — six evaluation criteria (spec compliance, correctness, test coverage, security, maintainability, consistency), three-tier issue classification (critical/important/suggestion), structured output format with verdicts (PASS/NEEDS FIXES/FAIL), and anti-performative-agreement guidance for receiving review feedback. Forked from obra/superpowers (MIT).
+- **Agent definitions** (`agents/`): new directory for subagent prompt templates installed to `~/.claude/agents/`. First agent: `code-reviewer.md` — review-only subagent that evaluates diffs against plans and coding standards.
+- **`CODE_REVIEWER_PROMPT`** in `cli/lib/agents.js`: agent prompt template for spawning code reviewer subagents in the Verify phase. Takes diff, plan, and optional task spec context.
+- Agent install infrastructure: `installAgents()`, `removeAgents()`, `getAgentFiles()` in `cli/lib/skills.js`; `PATHS.agentsDir` in platform.js; wired into install, update, uninstall, and doctor commands.
+- Skill count: 9 directories (was 8). Agent count: 1 definition.
+
 ## [3.10.0] - 2026-03-31
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "supermind-claude",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "description": "Complete, opinionated Claude Code setup — hooks, skills, status line, MCP servers, and living documentation",
   "bin": {
     "supermind-claude": "cli/index.js",
@@ -10,6 +10,7 @@
     "cli/",
     "hooks/",
     "skills/",
+    "agents/",
     "templates/",
     "airis/",
     ".env.example"

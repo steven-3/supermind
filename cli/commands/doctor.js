@@ -5,7 +5,7 @@ const path = require('path');
 const { PATHS } = require('../lib/platform');
 const logger = require('../lib/logger');
 const { getHookFiles } = require('../lib/hooks');
-const { getSkillDirs } = require('../lib/skills');
+const { getSkillDirs, getAgentFiles } = require('../lib/skills');
 const { version } = require('../../package.json');
 
 function check(label, pass, detail) {
@@ -73,6 +73,18 @@ module.exports = function doctor(flags) {
   for (const dir of expectedSkills) {
     const skillPath = path.join(PATHS.skillsDir, dir);
     run(`Skill: ${dir}`, fs.existsSync(skillPath) && fs.existsSync(path.join(skillPath, 'SKILL.md')));
+  }
+
+  // Agents present
+  let expectedAgents;
+  try {
+    expectedAgents = getAgentFiles();
+  } catch (err) {
+    run('Agent enumeration', false, err.message);
+    expectedAgents = [];
+  }
+  for (const file of expectedAgents) {
+    run(`Agent: ${file}`, fs.existsSync(path.join(PATHS.agentsDir, file)));
   }
 
   // Template
