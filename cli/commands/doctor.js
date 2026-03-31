@@ -218,30 +218,38 @@ function checkContextMonitor() {
 function checkPlugin() {
   section('Plugin manifest');
 
-  try {
-    const pluginsPath = path.join(PATHS.claudeHome, 'plugins', 'installed_plugins.json');
-    if (!fs.existsSync(pluginsPath)) {
-      return fail('not registered — installed_plugins.json missing');
-    }
-    const registry = JSON.parse(fs.readFileSync(pluginsPath, 'utf-8'));
-    const entry = registry.plugins && registry.plugins[PLUGIN_KEY];
-    if (!entry || !Array.isArray(entry) || entry.length === 0) {
-      return fail('not registered in installed_plugins.json');
-    }
+  const pluginsPath = path.join(PATHS.claudeHome, 'plugins', 'installed_plugins.json');
+  if (!fs.existsSync(pluginsPath)) {
+    return fail('not registered — installed_plugins.json missing');
+  }
 
-    // Verify the cached plugin.json is valid
-    const installPath = entry[0].installPath;
-    if (!installPath) {
-      return fail('plugin registry entry missing installPath');
-    }
-    const manifestPath = path.join(installPath, '.claude-plugin', 'plugin.json');
-    if (fs.existsSync(manifestPath)) {
-      JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-      return ok('valid');
-    }
-    return fail('manifest missing from cache');
+  let registry;
+  try {
+    registry = JSON.parse(fs.readFileSync(pluginsPath, 'utf-8'));
   } catch (err) {
-    return fail('check failed', err.message);
+    return fail('installed_plugins.json invalid', err.message);
+  }
+
+  const entry = registry.plugins && registry.plugins[PLUGIN_KEY];
+  if (!entry || !Array.isArray(entry) || entry.length === 0) {
+    return fail('not registered in installed_plugins.json');
+  }
+
+  const installPath = entry[0].installPath;
+  if (!installPath) {
+    return fail('plugin registry entry missing installPath');
+  }
+
+  const manifestPath = path.join(installPath, '.claude-plugin', 'plugin.json');
+  if (!fs.existsSync(manifestPath)) {
+    return fail('manifest missing from cache');
+  }
+
+  try {
+    JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    return ok('valid');
+  } catch (err) {
+    return fail('plugin.json manifest invalid', err.message);
   }
 }
 
