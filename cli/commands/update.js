@@ -8,6 +8,7 @@ const { installHooks, getHookSettings } = require('../lib/hooks');
 const { installSkills, removeLegacySkills, installAgents } = require('../lib/skills');
 const { installTemplates } = require('../lib/templates');
 const { detectMcpMode } = require('../lib/mcp');
+const { updatePlugin } = require('../lib/plugin');
 const { version } = require('../../package.json');
 
 module.exports = function update(flags) {
@@ -23,7 +24,7 @@ module.exports = function update(flags) {
     logger.info(`Updating from v${installedVersion} to v${version}...`);
   }
 
-  const TOTAL = 5;
+  const TOTAL = 6;
 
   // Step 1: Hooks
   logger.step(1, TOTAL, 'Updating hooks...');
@@ -48,8 +49,12 @@ module.exports = function update(flags) {
   logger.step(4, TOTAL, 'Updating templates...');
   installTemplates(detectMcpMode());
 
-  // Step 5: Vendor skills check
-  logger.step(5, TOTAL, 'Checking vendor skills...');
+  // Step 5: Plugin manifest
+  logger.step(5, TOTAL, 'Updating plugin manifest...');
+  updatePlugin();
+
+  // Step 6: Vendor skills check
+  logger.step(6, TOTAL, 'Checking vendor skills...');
   try {
     const vendorSkills = require('../lib/vendor-skills');
     const globalLock = vendorSkills.readLockFile('global');

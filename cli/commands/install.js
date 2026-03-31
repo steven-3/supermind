@@ -8,11 +8,12 @@ const { installHooks, getHookSettings } = require('../lib/hooks');
 const { installSkills, removeLegacySkills, installAgents } = require('../lib/skills');
 const { setupMcp } = require('../lib/mcp');
 const { installTemplates } = require('../lib/templates');
+const { installPlugin } = require('../lib/plugin');
 const { version } = require('../../package.json');
 
 module.exports = async function install(flags) {
   logger.banner();
-  const TOTAL = 6;
+  const TOTAL = 7;
 
   // Step 1: Platform setup
   logger.step(1, TOTAL, 'Detecting platform and creating directories...');
@@ -67,6 +68,10 @@ module.exports = async function install(flags) {
   // Step 6: Templates
   logger.step(6, TOTAL, 'Installing templates...');
   installTemplates(mcpConfig.mode);
+
+  // Step 7: Plugin manifest
+  logger.step(7, TOTAL, 'Registering plugin...');
+  installPlugin();
 
   // Write version marker
   fs.writeFileSync(PATHS.versionFile, version);

@@ -125,6 +125,16 @@ module.exports = function doctor(flags) {
     // No vendor skills or module not loaded — skip silently
   }
 
+  // Plugin registration
+  run('Plugin registered', (() => {
+    try {
+      const pluginsPath = path.join(PATHS.claudeHome, 'plugins', 'installed_plugins.json');
+      if (!fs.existsSync(pluginsPath)) return false;
+      const registry = JSON.parse(fs.readFileSync(pluginsPath, 'utf-8'));
+      return !!(registry.plugins && registry.plugins['supermind@npm']);
+    } catch { return false; }
+  })());
+
   // Improvement log
   run('Improvement log writable', (() => {
     const logPath = path.join(PATHS.claudeHome, 'improvement-log.jsonl');

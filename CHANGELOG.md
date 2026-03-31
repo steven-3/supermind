@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.17.0] - 2026-03-31
+
+### Added
+- **Plugin manifest** (`.claude-plugin/plugin.json`): Supermind now registers as a Claude Code plugin during install, enabling future `/plugin update supermind` support and marketplace discovery. Dual distribution — npm package for CLI + infrastructure, plugin manifest for skill/hook/agent discovery.
+- **Plugin module** (`cli/lib/plugin.js`): handles plugin registration in `~/.claude/plugins/installed_plugins.json`, manifest generation with auto-versioning from `package.json`, and cache directory management at `~/.claude/plugins/cache/npm/supermind/<version>/`.
+- **Doctor check**: plugin registration health check verifies `supermind@npm` entry exists in `installed_plugins.json`.
+- Updated install (7 steps, was 6), update (6 steps, was 5), and uninstall commands to manage plugin lifecycle.
+- `.claude-plugin/` added to npm `files` array for package distribution.
+- Sub-project 5.1 of Supermind v4 Unified Engine design.
+
 ## [3.16.0] - 2026-03-31
 
 ### Changed

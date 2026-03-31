@@ -9,6 +9,7 @@ const { readSettings, writeSettings, removeSupermindEntries, backupSettings } = 
 const { removeHooks } = require('../lib/hooks');
 const { removeSkills, removeAgents } = require('../lib/skills');
 const { removeTemplates } = require('../lib/templates');
+const { removePlugin } = require('../lib/plugin');
 
 function prompt(question) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -40,6 +41,10 @@ module.exports = async function uninstall(flags) {
   // Remove templates
   console.log('  Removing templates...');
   removeTemplates();
+
+  // Remove plugin registration
+  console.log('  Removing plugin registration...');
+  removePlugin();
 
   // Clean settings
   console.log('  Cleaning settings...');

@@ -5,11 +5,12 @@ Supermind is an npm package (`supermind-claude`) providing complete Claude Code 
 
 **File organization:**
 - `cli/` — Installer commands (install, update, doctor, uninstall, skill)
-- `cli/lib/` — Shared utilities (paths, settings, hooks, skills, templates, mcp, logger, vendor-skills)
+- `cli/lib/` — Shared utilities (paths, settings, hooks, skills, templates, mcp, logger, vendor-skills, plugin)
 - `hooks/` — Runtime hooks copied to `~/.claude/hooks/` (8 hooks: bash-permissions, session-start, session-end, cost-tracker, statusline, pre-merge-checklist, improvement-logger, context-monitor)
 - `skills/` — SKILL.md files copied to `~/.claude/skills/` (15 dirs: supermind, supermind-init, supermind-living-docs, anti-rationalization, verification-before-completion, tdd, systematic-debugging, brainstorming, code-review, using-git-worktrees, writing-plans, executing-plans, finishing-branches, quick, project)
 - `agents/` — Agent definition .md files copied to `~/.claude/agents/` (1 agent: code-reviewer)
 - `templates/` — CLAUDE.md project template copied to `~/.claude/templates/`
+- `.claude-plugin/` — Claude Code plugin manifest for dual distribution (npm + plugin)
 
 ## Skill System
 - **`/supermind`** is the complexity router — auto-detects task scope and routes to `/quick` or `/project` mode. Announces its decision with an escape hatch. Supports all composable flags from both modes. This is the default entry point; `/quick` and `/project` can still be invoked directly.

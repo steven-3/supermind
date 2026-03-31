@@ -20,10 +20,10 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | Path | Purpose |
 |------|---------|
 | `cli/index.js` | Entry point — parses argv, routes to commands, handles --help/--version |
-| `cli/commands/install.js` | Full setup: creates ~/.claude dirs, merges settings, installs hooks/skills/agents/MCP/templates |
-| `cli/commands/update.js` | Refreshes hooks, skills, agents, templates; re-merges hook settings; updates version marker |
-| `cli/commands/doctor.js` | Health check: validates Node version, ~/.claude structure, settings, hooks, skills, agents, Docker, vendor skills |
-| `cli/commands/uninstall.js` | Removes all Supermind components (including agents) from ~/.claude, cleans settings |
+| `cli/commands/install.js` | Full setup: creates ~/.claude dirs, merges settings, installs hooks/skills/agents/MCP/templates, registers plugin |
+| `cli/commands/update.js` | Refreshes hooks, skills, agents, templates, plugin manifest; re-merges hook settings; updates version marker |
+| `cli/commands/doctor.js` | Health check: validates Node version, ~/.claude structure, settings, hooks, skills, agents, plugin registration, Docker, vendor skills |
+| `cli/commands/uninstall.js` | Removes all Supermind components (including agents and plugin registration) from ~/.claude, cleans settings |
 | `cli/commands/approve.js` | Manages ~/.claude/supermind-approved.json (add/list/remove auto-approved command patterns) |
 | `cli/commands/skill.js` | Vendor skill management CLI (add/update/list/remove) |
 | `cli/lib/platform.js` | PATHS constant (including agentsDir) and utilities: ensureDir(), getPackageRoot() |
@@ -33,6 +33,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `cli/lib/skills.js` | Skill and agent lifecycle: installSkills(), removeSkills(), removeLegacySkills(), installAgents(), removeAgents(), getAgentFiles() |
 | `cli/lib/templates.js` | Template lifecycle: installTemplates(), removeTemplates() |
 | `cli/lib/mcp.js` | MCP server setup: setupMcp(), promptApiKeys(), setupDocker(), setupDirect() |
+| `cli/lib/plugin.js` | Plugin lifecycle: installPlugin(), updatePlugin(), removePlugin(). Registers Supermind as a Claude Code plugin in ~/.claude/plugins/installed_plugins.json, manages cache at ~/.claude/plugins/cache/npm/supermind/<version>/ |
 | `cli/lib/vendor-skills.js` | Skill fetching, hashing, lock file management (skills-lock.json) |
 | `cli/lib/planning.js` | Planning state management: .planning/ directory CRUD (roadmap, phases, progress, config, research, plans, tasks). Used by Project Mode orchestrator. Path-safe via safeJoin/safeFilenameSegment |
 | `cli/lib/executor.js` | Executor engine: buildTaskPacket (assembles self-contained task packets with spec/context/skills/contract), executeTask (builds Agent tool invocation data), buildWavePlan (topological sort into parallel waves), formatWaveProgress (Markdown progress table), getSkillContent (reads SKILL.md from ~/.claude/skills/ with project fallback). SKILL_MAP maps task types to methodology skills. Path-safe via safeJoin |
@@ -65,6 +66,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `agents/code-reviewer.md` | Agent definition for code reviewer subagent — review-only constraint, structured review output, input template for diff/plan/task_spec |
 | `templates/CLAUDE.md` | Project CLAUDE.md template with infrastructure and placeholder sections |
 | `airis/mcp-config.json` | Direct-mode MCP server configuration (npx/uvx launch commands) |
+| `.claude-plugin/plugin.json` | Claude Code plugin manifest — name, description, version, author, keywords. Version auto-synced from package.json on install/update |
 | `.env.example` | Environment variable template (TAVILY_API_KEY, TWENTYFIRST_API_KEY) |
 
 ## Dependencies & Data Flow
@@ -82,6 +84,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 │    ├─ skills.js → copy skills/*/ → ~/.claude/skills/             │
 │    ├─ skills.js → copy agents/*.md → ~/.claude/agents/           │
 │    ├─ templates.js → copy templates/ → ~/.claude/templates/      │
+│    ├─ plugin.js → register in ~/.claude/plugins/                 │
 │    └─ mcp.js → setup Docker/direct MCP servers                   │
 │                                                                   │
 ├─────────────────────────────────────────────────────────────────┤
@@ -123,10 +126,10 @@ supermind skill add <github-url> -> git clone -> hash -> copy -> skills-lock.jso
 | File | Depends On | Used By |
 |------|-----------|---------|
 | `cli/index.js` | package.json | Entry point (bin) |
-| `cli/commands/install.js` | platform, logger, settings, hooks, skills, mcp, templates | index.js |
-| `cli/commands/update.js` | platform, logger, settings, hooks, skills, templates, package.json | index.js |
+| `cli/commands/install.js` | platform, logger, settings, hooks, skills, mcp, templates, plugin | index.js |
+| `cli/commands/update.js` | platform, logger, settings, hooks, skills, templates, plugin, package.json | index.js |
 | `cli/commands/doctor.js` | platform, logger, settings, hooks, skills, package.json | index.js |
-| `cli/commands/uninstall.js` | platform, logger, settings, hooks, skills, templates, readline | index.js |
+| `cli/commands/uninstall.js` | platform, logger, settings, hooks, skills, templates, plugin, readline | index.js |
 | `cli/commands/approve.js` | fs, path, platform, logger | index.js |
 | `cli/commands/skill.js` | logger, vendor-skills | index.js |
 | `cli/lib/platform.js` | fs, path, os | All commands, all lib modules |
@@ -136,6 +139,7 @@ supermind skill add <github-url> -> git clone -> hash -> copy -> skills-lock.jso
 | `cli/lib/skills.js` | fs, path, platform, logger | install, update, doctor, uninstall |
 | `cli/lib/templates.js` | fs, path, platform, logger | install, uninstall |
 | `cli/lib/mcp.js` | fs, path, readline, child_process, platform, logger | install |
+| `cli/lib/plugin.js` | fs, path, platform, logger, package.json | install, update, uninstall |
 | `cli/lib/vendor-skills.js` | fs, path, os, crypto, child_process | skill command |
 | `cli/lib/planning.js` | fs, path | Project Mode orchestrator |
 | `cli/lib/executor.js` | fs, path, os | Project Mode orchestrator (builds task packets and wave plans) |

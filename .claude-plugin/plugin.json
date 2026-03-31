@@ -1,0 +1,21 @@
+{
+  "name": "supermind",
+  "description": "Unified skill engine combining execution infrastructure with behavioral discipline for autonomous Claude Code development",
+  "version": "3.17.0",
+  "author": {
+    "name": "Steven Spivak"
+  },
+  "homepage": "https://github.com/steven-3/supermind",
+  "repository": "https://github.com/steven-3/supermind",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "hooks",
+    "tdd",
+    "debugging",
+    "code-review",
+    "worktrees",
+    "autonomous",
+    "developer-tools"
+  ]
+}
