@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.0.1] - 2026-03-31
+
+### Fixed
+- Running `supermind` with no arguments now shows help instead of running install
+
 ## [4.0.0] - 2026-03-31
 
 Supermind v4: Unified Skill Engine — ground-up rebuild combining GSD's execution infrastructure with Superpowers' behavioral discipline into a single native system. OpenSpec removed. Superpowers plugin dependency removed. Methodology skills forked from obra/superpowers (MIT), adapted for executor injection model.

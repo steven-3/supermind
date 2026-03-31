@@ -16,7 +16,7 @@ function parseArgs(argv) {
   const args = argv.slice(2);
   const flags = {};
   const positionalArgs = [];
-  let command = 'install'; // default
+  let command = null; // no default — show help when no command given
   let commandFound = false;
 
   for (let i = 0; i < args.length; i++) {
@@ -47,7 +47,7 @@ function showHelp() {
   Usage: supermind-claude [command] [options]
 
   Commands:
-    install     Full global setup (default)
+    install     Full global setup
     update      Refresh hooks, skills, and templates
     doctor      Verify installation health
     uninstall   Remove all Supermind components
@@ -69,7 +69,7 @@ async function main() {
   const { command, flags } = parseArgs(process.argv);
 
   if (flags.version) { console.log(version); process.exit(0); }
-  if (flags.help) { showHelp(); process.exit(0); }
+  if (flags.help || !command) { showHelp(); process.exit(0); }
 
   const run = COMMANDS[command]();
   await run(flags);
