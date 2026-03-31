@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.14.0] - 2026-03-31
+
+### Added
+- **Quick Mode skill** (`skills/quick/SKILL.md`): single-executor mode for small, clear tasks — bug fixes, renames, config changes, adding tests. Activated by `quick:` prefix or `/quick` invocation. Parses task description to detect type (fix-bug, write-test, refactor, write-feature), builds a task packet via `buildTaskPacket()` from `cli/lib/executor.js` with automatic skill injection via `SKILL_MAP`, spawns a single fresh-context executor subagent, and reports results. Supports composable flags: `--with-research` (pre-dispatch researcher via `RESEARCHER_PROMPTS.featureResearcher` from `cli/lib/agents.js`) and `--with-discuss` (2-3 clarifying questions before dispatch). Worktree decision based on file count (>2-3 files → worktree via `executeTask({ useWorktree: true })`). Fully stateless — no `.planning/` directory. Sub-project 4.1 of Supermind v4 Unified Engine design.
+- Updated `KNOWN_SKILLS` in `cli/lib/skills.js` to include `quick`
+- Skill count: 14 directories (was 13)
+
 ## [3.13.0] - 2026-03-31
 
 ### Added

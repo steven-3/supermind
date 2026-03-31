@@ -60,6 +60,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `skills/writing-plans/SKILL.md` | Atomic implementation planning with dependency graphs — used by orchestrator Plan phase. Forked from obra/superpowers (MIT) |
 | `skills/executing-plans/SKILL.md` | Wave-based plan execution with progress tracking and failure handling — used by orchestrator Execute phase. Forked from obra/superpowers (MIT) |
 | `skills/finishing-branches/SKILL.md` | Ship phase handler — push branch, open PR, or keep/discard with worktree cleanup. Never merges to main/master. Forked from obra/superpowers (MIT) |
+| `skills/quick/SKILL.md` | Quick Mode orchestrator — single-executor path for small tasks. Detects task type (fix-bug/write-test/refactor/write-feature), builds task packet via executor.js buildTaskPacket(), dispatches one fresh-context subagent with SKILL_MAP-injected methodology skills. Supports --with-research and --with-discuss flags. Stateless (no .planning/ state). Sub-project 4.1 of v4 Unified Engine |
 | `agents/code-reviewer.md` | Agent definition for code reviewer subagent — review-only constraint, structured review output, input template for diff/plan/task_spec |
 | `templates/CLAUDE.md` | Project CLAUDE.md template with infrastructure and placeholder sections |
 | `airis/mcp-config.json` | Direct-mode MCP server configuration (npx/uvx launch commands) |
