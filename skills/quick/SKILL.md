@@ -95,6 +95,7 @@ The function automatically injects methodology skills based on `task.type` using
 | `fix-bug` | systematic-debugging, verification-before-completion, anti-rationalization, using-git-worktrees |
 | `refactor` | verification-before-completion, anti-rationalization, using-git-worktrees |
 | `write-test` | tdd, anti-rationalization |
+| `research` | *(none — not used by Quick Mode's auto-detection, but valid in executor.js)* |
 
 ### Step 4 — Decide Worktree
 
