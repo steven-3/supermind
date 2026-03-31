@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.12.0] - 2026-03-31
+
+### Added
+- **Git worktree skill** (`skills/using-git-worktrees/SKILL.md`): automated worktree creation with safety checks for isolated development — used by executors when task scope warrants it (>2-3 files, logic changes, parallel execution). Covers .gitignore verification, dependency auto-detection (npm/yarn/pnpm, cargo, pip, go), baseline test verification, and completion reporting. Executors create and commit in worktrees; orchestrator handles merge and cleanup. Forked from obra/superpowers (MIT).
+- Skill count: 10 directories (was 9)
+
 ## [3.11.0] - 2026-03-31
 
 ### Added
