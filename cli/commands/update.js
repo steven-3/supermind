@@ -8,7 +8,7 @@ const { installHooks, getHookSettings } = require('../lib/hooks');
 const { installSkills, removeLegacySkills, installAgents } = require('../lib/skills');
 const { installTemplates } = require('../lib/templates');
 const { detectMcpMode } = require('../lib/mcp');
-const { updatePlugin } = require('../lib/plugin');
+const { installPlugin } = require('../lib/plugin');
 const { version } = require('../../package.json');
 
 module.exports = function update(flags) {
@@ -51,7 +51,7 @@ module.exports = function update(flags) {
 
   // Step 5: Plugin manifest
   logger.step(5, TOTAL, 'Updating plugin manifest...');
-  updatePlugin();
+  installPlugin();
 
   // Step 6: Vendor skills check
   logger.step(6, TOTAL, 'Checking vendor skills...');

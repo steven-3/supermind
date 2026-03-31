@@ -33,7 +33,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `cli/lib/skills.js` | Skill and agent lifecycle: installSkills(), removeSkills(), removeLegacySkills(), installAgents(), removeAgents(), getAgentFiles() |
 | `cli/lib/templates.js` | Template lifecycle: installTemplates(), removeTemplates() |
 | `cli/lib/mcp.js` | MCP server setup: setupMcp(), promptApiKeys(), setupDocker(), setupDirect() |
-| `cli/lib/plugin.js` | Plugin lifecycle: installPlugin(), updatePlugin(), removePlugin(). Registers Supermind as a Claude Code plugin in ~/.claude/plugins/installed_plugins.json, manages cache at ~/.claude/plugins/cache/npm/supermind/<version>/ |
+| `cli/lib/plugin.js` | Plugin lifecycle: installPlugin(), removePlugin(). Registers Supermind as a Claude Code plugin in ~/.claude/plugins/installed_plugins.json, manages cache at ~/.claude/plugins/cache/local/supermind/<version>/. Forward-looking registration stub — content delivered via traditional ~/.claude/ paths, not plugin cache |
 | `cli/lib/vendor-skills.js` | Skill fetching, hashing, lock file management (skills-lock.json) |
 | `cli/lib/planning.js` | Planning state management: .planning/ directory CRUD (roadmap, phases, progress, config, research, plans, tasks). Used by Project Mode orchestrator. Path-safe via safeJoin/safeFilenameSegment |
 | `cli/lib/executor.js` | Executor engine: buildTaskPacket (assembles self-contained task packets with spec/context/skills/contract), executeTask (builds Agent tool invocation data), buildWavePlan (topological sort into parallel waves), formatWaveProgress (Markdown progress table), getSkillContent (reads SKILL.md from ~/.claude/skills/ with project fallback). SKILL_MAP maps task types to methodology skills. Path-safe via safeJoin |
@@ -66,7 +66,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `agents/code-reviewer.md` | Agent definition for code reviewer subagent — review-only constraint, structured review output, input template for diff/plan/task_spec |
 | `templates/CLAUDE.md` | Project CLAUDE.md template with infrastructure and placeholder sections |
 | `airis/mcp-config.json` | Direct-mode MCP server configuration (npx/uvx launch commands) |
-| `.claude-plugin/plugin.json` | Claude Code plugin manifest — name, description, version, author, keywords. Version auto-synced from package.json on install/update |
+| `.claude-plugin/plugin.json` | Claude Code plugin manifest template — name, description, author, keywords. Uses placeholder version (0.0.0) that is always overridden from package.json on install/update |
 | `.env.example` | Environment variable template (TAVILY_API_KEY, TWENTYFIRST_API_KEY) |
 
 ## Dependencies & Data Flow

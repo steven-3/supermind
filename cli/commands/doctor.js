@@ -6,6 +6,7 @@ const { PATHS } = require('../lib/platform');
 const logger = require('../lib/logger');
 const { getHookFiles } = require('../lib/hooks');
 const { getSkillDirs, getAgentFiles } = require('../lib/skills');
+const { PLUGIN_KEY } = require('../lib/plugin');
 const { version } = require('../../package.json');
 
 function check(label, pass, detail) {
@@ -131,7 +132,7 @@ module.exports = function doctor(flags) {
       const pluginsPath = path.join(PATHS.claudeHome, 'plugins', 'installed_plugins.json');
       if (!fs.existsSync(pluginsPath)) return false;
       const registry = JSON.parse(fs.readFileSync(pluginsPath, 'utf-8'));
-      return !!(registry.plugins && registry.plugins['supermind@npm']);
+      return !!(registry.plugins && registry.plugins[PLUGIN_KEY]);
     } catch { return false; }
   })());
 
