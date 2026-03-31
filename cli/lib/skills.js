@@ -38,7 +38,7 @@ function installSkills() {
 }
 
 // Fallback list if package source is unavailable
-const KNOWN_SKILLS = ['supermind', 'supermind-init', 'supermind-living-docs', 'anti-rationalization', 'verification-before-completion', 'tdd', 'systematic-debugging', 'brainstorming', 'code-review', 'using-git-worktrees'];
+const KNOWN_SKILLS = ['supermind', 'supermind-init', 'supermind-living-docs', 'anti-rationalization', 'verification-before-completion', 'tdd', 'systematic-debugging', 'brainstorming', 'code-review', 'using-git-worktrees', 'writing-plans', 'executing-plans', 'finishing-branches'];
 
 function removeSkills() {
   let dirs;

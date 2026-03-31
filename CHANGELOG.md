@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.13.0] - 2026-03-31
+
+### Added
+- **Writing-plans skill** (`skills/writing-plans/SKILL.md`): creates atomic implementation plans with dependency graphs for the orchestrator Plan phase. Includes task spec format (id, type, dependsOn, acceptance criteria, verification), wave grouping via dependency graph, plan-checker self-review loop (max 3 iterations), and `.planning/` state output (plan.md + individual task specs). Forked from obra/superpowers (MIT).
+- **Executing-plans skill** (`skills/executing-plans/SKILL.md`): wave-based plan execution with progress tracking and failure handling for the orchestrator Execute phase. Coordinates fresh-context executor dispatch via `buildTaskPacket`/`executeTask`/`buildWavePlan` from `executor.js`, respects `maxParallel` config (default 3), tracks progress in `.planning/phases/phase-N/progress.md`, handles single-task retry, multi-failure pause, and dependency cascade skip. Forked from obra/superpowers (MIT).
+- **Finishing-branches skill** (`skills/finishing-branches/SKILL.md`): Ship phase handler — push branch, open PR, or keep/discard branch with worktree cleanup. Three options: Create PR (default, auto-generates description from `.planning/` state), Keep Branch (preserves worktree), Discard (requires typed confirmation). Never merges to main/master, never force pushes. Forked from obra/superpowers (MIT).
+- Updated `KNOWN_SKILLS` in `cli/lib/skills.js` to include `writing-plans`, `executing-plans`, `finishing-branches`
+- Skill count: 13 directories (was 10)
+
 ## [3.12.0] - 2026-03-31
 
 ### Added
