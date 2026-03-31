@@ -92,9 +92,9 @@ const DANGEROUS_FLAGS = [
 // ─── Blocklist: Filesystem destructive ──────────────────────────────────────
 
 const FILESYSTEM_BLOCKED = [
-  /\brm\b/,
-  /\brmdir\b/,
-  /\bdel\b/,
+  /^rm\b/,
+  /^rmdir\b/,
+  /^del\b/,
 ];
 
 // ─── Blocklist: Process termination ─────────────────────────────────────────
@@ -129,6 +129,7 @@ const DB_DESTRUCTIVE_SQL = [
 
 const HTTP_MUTATING = [
   /\bcurl\b.*\s(-X\s*(POST|PUT|PATCH|DELETE)|--request\s*(POST|PUT|PATCH|DELETE))/,
+  /\bcurl\b.*\s(-d\s|--data\s|--data-raw\s|--data-binary\s|--data-urlencode\s|-F\s|--form\s)/,
   /\bwget\b.*\s--method=(POST|PUT|PATCH|DELETE)/,
   /\bwget\b.*\s--post-data\b/,
   /\bwget\b.*\s--post-file\b/,
@@ -177,9 +178,10 @@ function classifyGitPush(gitCmd) {
   const remote = parts.length >= 2 ? parts[0] : '';
   const refspec = parts.length >= 2 ? parts[1] : (parts[0] || '');
 
-  // Block push to main/master
+  // Block push to main/master (as source or destination in refspec)
   if (/^(main|master)(:|$)/.test(refspec)) return "ask";
   if (remote && /^(main|master)$/.test(refspec)) return "ask";
+  if (/:(main|master)$/.test(refspec)) return "ask";
 
   // Everything else auto-approved (bare "git push", feature branches, etc.)
   return "allow";
@@ -456,4 +458,6 @@ function main() {
 // Export for testing
 module.exports = { classifyCommand, classifySegment, classifyGitCommand, classifyGitPush, isUserApproved };
 
-main();
+if (require.main === module) {
+  main();
+}
