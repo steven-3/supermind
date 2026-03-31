@@ -150,3 +150,16 @@ The document should capture:
 | Design requires modifying half the codebase | Scope is too large — decompose |
 | You can't explain a component's purpose in one sentence | Boundary is wrong — rethink |
 | Existing codebase has a pattern for this and you're ignoring it | Follow the pattern unless it's actively broken |
+
+## Verification Checklist
+
+Before transitioning to the Plan phase:
+
+- [ ] Project context explored (files, docs, recent commits)
+- [ ] Scope assessed — multi-system requests decomposed into sub-projects
+- [ ] User understands the problem and constraints
+- [ ] 2-3 approaches proposed with trade-offs
+- [ ] Design presented section by section with user approval
+- [ ] No unnecessary features in design (YAGNI applied)
+- [ ] Design follows existing codebase patterns where applicable
+- [ ] Structured design document saved to `.planning/phases/phase-N/discussion.md`
