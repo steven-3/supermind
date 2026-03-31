@@ -7,11 +7,12 @@ Supermind is an npm package (`supermind-claude`) providing complete Claude Code 
 - `cli/` — Installer commands (install, update, doctor, uninstall, skill)
 - `cli/lib/` — Shared utilities (paths, settings, hooks, skills, templates, mcp, logger, vendor-skills)
 - `hooks/` — Runtime hooks copied to `~/.claude/hooks/` (8 hooks: bash-permissions, session-start, session-end, cost-tracker, statusline, pre-merge-checklist, improvement-logger, context-monitor)
-- `skills/` — SKILL.md files copied to `~/.claude/skills/` (14 dirs: supermind, supermind-init, supermind-living-docs, anti-rationalization, verification-before-completion, tdd, systematic-debugging, brainstorming, code-review, using-git-worktrees, writing-plans, executing-plans, finishing-branches, quick)
+- `skills/` — SKILL.md files copied to `~/.claude/skills/` (15 dirs: supermind, supermind-init, supermind-living-docs, anti-rationalization, verification-before-completion, tdd, systematic-debugging, brainstorming, code-review, using-git-worktrees, writing-plans, executing-plans, finishing-branches, quick, project)
 - `agents/` — Agent definition .md files copied to `~/.claude/agents/` (1 agent: code-reviewer)
 - `templates/` — CLAUDE.md project template copied to `~/.claude/templates/`
 
 ## Skill System
+- **`/project`** activates Project Mode — full six-phase lifecycle (discuss, research, plan, execute waves, verify, ship). Supports `--skip-discuss`, `--skip-research`, `--assumptions`, `--max-parallel N` flags.
 - **`/quick`** or `quick:` prefix activates Quick Mode — single-executor path for small tasks (bug fixes, renames, config changes, tests). Supports `--with-research` and `--with-discuss` flags.
 - **`/supermind-init`** onboards a project: creates CLAUDE.md, generates ARCHITECTURE.md and DESIGN.md, runs health checks
 - **`/supermind-living-docs`** keeps ARCHITECTURE.md and DESIGN.md in sync with code changes (manual trigger)

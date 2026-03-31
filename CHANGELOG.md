@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.15.0] - 2026-03-31
+
+### Added
+- **Project Mode skill** (`skills/project/SKILL.md`): full six-phase lifecycle orchestrator — discuss, research, plan, execute (waves), verify, ship. Coordinates the entire development lifecycle for features, refactors, new systems, and multi-file changes. Phase 1 (Discuss): invokes brainstorming skill with interactive or `--assumptions` mode, saves design to `.planning/phases/phase-N/discussion.md` via `writeDiscussion()`. Phase 2 (Research): spawns 4 parallel researcher subagents (`RESEARCHER_PROMPTS.stackResearcher/featureResearcher/architectureResearcher/pitfallResearcher` from `cli/lib/agents.js`), saves outputs via `writeResearch()`. Phase 3 (Plan): invokes writing-plans skill, generates atomic task plans via `PLANNER_PROMPT`, validates with `PLAN_CHECKER_PROMPT` (max 3 iterations), saves via `writePlan()`/`writeTask()`. Phase 4 (Execute): invokes executing-plans skill, builds wave plan via `buildWavePlan()`, dispatches parallel executors via `buildTaskPacket()`/`executeTask()` with automatic `SKILL_MAP` injection, tracks progress via `writeProgress()`, handles failures with `DEBUGGER_PROMPT` (one retry). Phase 5 (Verify): invokes code-review skill, spawns code-reviewer via `CODE_REVIEWER_PROMPT` and verifier via `VERIFIER_PROMPT`, fix loop (max 3 rounds). Phase 6 (Ship): invokes finishing-branches skill, pushes branch, opens PR with auto-generated body from `.planning/` state. Composable flags: `--skip-discuss`, `--skip-research`, `--assumptions`, `--max-parallel N`. Orchestrator never writes code — only coordinates subagents. Sub-project 4.2 of Supermind v4 Unified Engine design.
+- Updated `KNOWN_SKILLS` in `cli/lib/skills.js` to include `project`
+- Skill count: 15 directories (was 14)
+
 ## [3.14.0] - 2026-03-31
 
 ### Added
