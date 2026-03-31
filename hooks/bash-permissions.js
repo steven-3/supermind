@@ -85,8 +85,8 @@ function stripGitGlobalFlags(gitArgs) {
 // ─── Blocklist: Dangerous flags ─────────────────────────────────────────────
 
 const DANGEROUS_FLAGS = [
-  /--force/,
-  /--hard/,
+  /--force(?![\w-])/,
+  /--hard(?![\w-])/,
 ];
 
 // ─── Blocklist: Filesystem destructive ──────────────────────────────────────
@@ -129,7 +129,7 @@ const DB_DESTRUCTIVE_SQL = [
 
 const HTTP_MUTATING = [
   /\bcurl\b.*\s(-X\s*(POST|PUT|PATCH|DELETE)|--request\s*(POST|PUT|PATCH|DELETE))/,
-  /\bcurl\b.*\s(-d\s|--data\s|--data-raw\s|--data-binary\s|--data-urlencode\s|-F\s|--form\s)/,
+  /\bcurl\b.*\s(-d[\s=]|--data[\s=]|--data-raw[\s=]|--data-binary[\s=]|--data-urlencode[\s=]|-F[\s=]|--form[\s=])/,
   /\bwget\b.*\s--method=(POST|PUT|PATCH|DELETE)/,
   /\bwget\b.*\s--post-data\b/,
   /\bwget\b.*\s--post-file\b/,
@@ -170,18 +170,22 @@ const GH_BLOCKED = [
 // ─── Git push classification ────────────────────────────────────────────────
 
 function classifyGitPush(gitCmd) {
-  if (/--force/.test(gitCmd)) return "ask";
+  if (/--force(?![\w-])/.test(gitCmd)) return "ask";
 
   // Extract positional args (skip flags like -u, --set-upstream, etc.)
   const parts = gitCmd.replace(/^push\s*/, '').split(/\s+/).filter(p => !p.startsWith('-'));
   // parts[0] = remote (or refspec if no remote), parts[1] = refspec
   const remote = parts.length >= 2 ? parts[0] : '';
-  const refspec = parts.length >= 2 ? parts[1] : (parts[0] || '');
+  const rawRefspec = parts.length >= 2 ? parts[1] : (parts[0] || '');
+  // Strip leading + (git force-push shorthand) for branch name matching
+  const refspec = rawRefspec.replace(/^\+/, '');
 
   // Block push to main/master (as source or destination in refspec)
   if (/^(main|master)(:|$)/.test(refspec)) return "ask";
   if (remote && /^(main|master)$/.test(refspec)) return "ask";
-  if (/:(main|master)$/.test(refspec)) return "ask";
+  if (/[:/](main|master)$/.test(refspec)) return "ask";
+  // Also block the raw +refspec form (force push shorthand)
+  if (/^\+/.test(rawRefspec)) return "ask";
 
   // Everything else auto-approved (bare "git push", feature branches, etc.)
   return "allow";
