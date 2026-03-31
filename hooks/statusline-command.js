@@ -3,7 +3,7 @@
 // Two-line display with box-drawing chars, context bar gradient, subagent tracking
 
 const { execSync } = require("child_process");
-const { readFileSync, statSync, openSync, readSync, closeSync } = require("fs");
+const { readFileSync, writeFileSync, statSync, openSync, readSync, closeSync } = require("fs");
 const { join } = require("path");
 
 let input = "";
@@ -121,6 +121,21 @@ process.stdin.on("end", () => {
       Number(cu.cache_read_input_tokens || 0)) || null;
   const windowSize = data?.context_window?.context_window_size;
   const cost = process.env.CLAUDE_SESSION_COST_USD;
+
+  // ─── Write context metrics for context-monitor hook ─────────────────────
+
+  if (usedPct != null && windowSize) {
+    try {
+      const metricsPath = join(process.env.HOME || process.env.USERPROFILE, ".claude", "context-metrics.json");
+      const percentRemaining = Math.round((100 - usedPct) * 10) / 10;
+      writeFileSync(metricsPath, JSON.stringify({
+        percentRemaining,
+        tokensUsed: usedTokens || 0,
+        tokensTotal: windowSize,
+        timestamp: Date.now(),
+      }));
+    } catch {}
+  }
 
   // ─── Helpers ────────────────────────────────────────────────────────────
 

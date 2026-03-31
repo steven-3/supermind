@@ -36,6 +36,8 @@ function getHookSettings() {
       PostToolUse: [{
         matcher: 'Bash',
         hooks: [{ type: 'command', command: `node "${path.join(hooksDir, 'pre-merge-checklist.js')}"`, timeout: 5 }],
+      }, {
+        hooks: [{ type: 'command', command: `node "${path.join(hooksDir, 'context-monitor.js')}"`, timeout: 3 }],
       }],
       Stop: [{
         hooks: [
@@ -53,7 +55,7 @@ function getHookSettings() {
 }
 
 // Fallback list if package source is unavailable
-const KNOWN_HOOKS = ['bash-permissions.js', 'session-start.js', 'session-end.js', 'cost-tracker.js', 'statusline-command.js', 'pre-merge-checklist.js', 'improvement-logger.js'];
+const KNOWN_HOOKS = ['bash-permissions.js', 'session-start.js', 'session-end.js', 'cost-tracker.js', 'statusline-command.js', 'pre-merge-checklist.js', 'improvement-logger.js', 'context-monitor.js'];
 
 function removeHooks() {
   if (!fs.existsSync(PATHS.hooksDir)) return;

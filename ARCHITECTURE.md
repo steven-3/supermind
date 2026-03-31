@@ -40,7 +40,8 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `hooks/cost-tracker.js` | Stop hook (async) — appends session cost estimate to ~/.claude/cost-log.jsonl |
 | `hooks/pre-merge-checklist.js` | PostToolUse hook — advisory pre-merge checks triggered on git merge Bash calls |
 | `hooks/improvement-logger.js` | Stop hook (async) — appends session improvement observations to ~/.claude/improvement-log.jsonl |
-| `hooks/statusline-command.js` | Status line renderer — shows user, host, git branch, context usage, agents, session cost |
+| `hooks/statusline-command.js` | Status line renderer — shows user, host, git branch, context usage, agents, session cost. Also writes context metrics to ~/.claude/context-metrics.json for the context monitor |
+| `hooks/context-monitor.js` | PostToolUse hook — reads context metrics and injects advisory warnings at 35%/25% remaining thresholds. Tracks state in ~/.claude/context-monitor-state.json |
 | `skills/supermind/SKILL.md` | Parent namespace listing /supermind-init and /supermind-living-docs |
 | `skills/supermind-init/SKILL.md` | Project onboarding: CLAUDE.md merge, ARCHITECTURE.md + DESIGN.md generation, health checks |
 | `skills/supermind-init/architecture-template.md` | Skeleton template for ARCHITECTURE.md |
@@ -84,6 +85,11 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 │  PostToolUse (Bash) → pre-merge-checklist.js                     │
 │    └─ Triggered on git merge → advisory warnings to stdout       │
 │                                                                   │
+│  PostToolUse (all) → context-monitor.js                          │
+│    ├─ Read ~/.claude/context-metrics.json (from statusline hook) │
+│    ├─ 35% remaining → advisory, 25% → warning                   │
+│    └─ Track state in ~/.claude/context-monitor-state.json        │
+│                                                                   │
 │  Stop → session-end.js + cost-tracker.js + improvement-logger.js │
 │    ├─ Save session summary → ~/.claude/sessions/                 │
 │    ├─ Append cost entry → ~/.claude/cost-log.jsonl               │
@@ -119,7 +125,8 @@ supermind skill add <github-url> -> git clone -> hash -> copy -> skills-lock.jso
 | `hooks/cost-tracker.js` | fs, path, os | Runtime (Stop) |
 | `hooks/pre-merge-checklist.js` | fs, path, os | Runtime (PostToolUse) |
 | `hooks/improvement-logger.js` | fs, path, os | Runtime (Stop) |
-| `hooks/statusline-command.js` | fs, path, child_process | Runtime (statusLine) |
+| `hooks/statusline-command.js` | fs, path, child_process | Runtime (statusLine), context-monitor.js (via metrics file) |
+| `hooks/context-monitor.js` | fs, path | Runtime (PostToolUse) |
 
 ## API Contracts
 
@@ -141,6 +148,7 @@ supermind skill add <github-url> -> git clone -> hash -> copy -> skills-lock.jso
 |-----------|---------|--------|---------|
 | PreToolUse | 5s | bash-permissions.js | Bash only |
 | PostToolUse | 5s | pre-merge-checklist.js | Bash only |
+| PostToolUse | 3s | context-monitor.js | All |
 | SessionStart | — | session-start.js | All |
 | Stop | async | session-end.js | All |
 | Stop | async | cost-tracker.js | All |

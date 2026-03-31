@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.4.0] - 2026-03-31
+
+### Added
+- **Context monitor hook** (`context-monitor.js`): two-hook bridge pattern that monitors context window usage and injects advisory warnings when context gets heavy
+  - At 35% remaining: advisory — "Consider wrapping up current task or spawning a fresh executor"
+  - At 25% remaining: warning — "Commit current work now. Remaining tasks should run in fresh subagents"
+  - Below 25%: repeats warning every 5th tool call to avoid spam
+  - Reads metrics from `~/.claude/context-metrics.json` written by the statusline hook
+  - Tracks warning state in `~/.claude/context-monitor-state.json` to avoid duplicate warnings
+  - Silent when metrics are stale (>60s) or missing
+
+### Changed
+- **Statusline hook** (`statusline-command.js`): now writes context metrics (percentRemaining, tokensUsed, tokensTotal, timestamp) to `~/.claude/context-metrics.json` on each render
+- Hook count: 8 (was 7)
+- PostToolUse now has two registered entries: pre-merge-checklist (Bash matcher) and context-monitor (all tools)
+
 ## [3.3.0] - 2026-03-31
 
 ### Removed

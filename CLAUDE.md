@@ -6,7 +6,7 @@ Supermind is an npm package (`supermind-claude`) providing complete Claude Code 
 **File organization:**
 - `cli/` — Installer commands (install, update, doctor, uninstall, skill)
 - `cli/lib/` — Shared utilities (paths, settings, hooks, skills, templates, mcp, logger, vendor-skills)
-- `hooks/` — Runtime hooks copied to `~/.claude/hooks/` (7 hooks: bash-permissions, session-start, session-end, cost-tracker, statusline, pre-merge-checklist, improvement-logger)
+- `hooks/` — Runtime hooks copied to `~/.claude/hooks/` (8 hooks: bash-permissions, session-start, session-end, cost-tracker, statusline, pre-merge-checklist, improvement-logger, context-monitor)
 - `skills/` — SKILL.md files copied to `~/.claude/skills/` (3 dirs: supermind, supermind-init, supermind-living-docs)
 - `templates/` — CLAUDE.md project template copied to `~/.claude/templates/`
 
@@ -32,6 +32,7 @@ Supermind is an npm package (`supermind-claude`) providing complete Claude Code 
 | statusline-command.js | statusLine | — | Two-line terminal display |
 | pre-merge-checklist.js | PostToolUse | Bash | Advisory pre-merge warnings |
 | improvement-logger.js | Stop | — | Session improvement tracking |
+| context-monitor.js | PostToolUse | — | Context window usage warnings at 35%/25% remaining |
 
 ## Shell & Git Permissions
 
