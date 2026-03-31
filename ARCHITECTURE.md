@@ -123,7 +123,7 @@ supermind skill add <github-url> -> git clone -> hash -> copy -> skills-lock.jso
 | `cli/lib/templates.js` | fs, path, platform, logger | install, uninstall |
 | `cli/lib/mcp.js` | fs, path, readline, child_process, platform, logger | install |
 | `cli/lib/vendor-skills.js` | fs, path, os, crypto, child_process | skill command |
-| `cli/lib/planning.js` | fs, path | Project Mode orchestrator, executor.js |
+| `cli/lib/planning.js` | fs, path | Project Mode orchestrator |
 | `cli/lib/executor.js` | fs, path, os | Project Mode orchestrator (builds task packets and wave plans) |
 | `cli/lib/agents.js` | (none — pure template functions) | Project Mode orchestrator (provides agent prompts) |
 | `hooks/bash-permissions.js` | fs, path, os | Runtime (PreToolUse) |

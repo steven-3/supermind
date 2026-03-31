@@ -75,7 +75,7 @@ function getSkillContent(skillName, projectRoot) {
   } catch { /* fall through */ }
 
   // Project-level: {projectRoot}/.claude/skills/{skillName}/SKILL.md
-  if (projectRoot) {
+  if (typeof projectRoot === 'string' && projectRoot.length > 0) {
     const projectClaudeDir = safeJoin(projectRoot, '.claude', 'project claude dir');
     const projectSkillsDir = safeJoin(projectClaudeDir, SKILLS_DIR_NAME, 'skills directory');
     const projectPath = safeJoin(
@@ -102,7 +102,7 @@ function getSkillContent(skillName, projectRoot) {
  * @param {string} task.id — unique task identifier
  * @param {string} task.title — short task title
  * @param {string} task.type — one of: write-feature, fix-bug, refactor, write-test, research
- * @param {string} task.description — what to do
+ * @param {string} [task.description] — what to do (falls back to placeholder)
  * @param {string[]} [task.files] — files the executor should read/modify
  * @param {string[]} [task.acceptance] — acceptance criteria
  * @param {string} [task.expectedOutput] — what the result should look like
@@ -118,6 +118,10 @@ function getSkillContent(skillName, projectRoot) {
 function buildTaskPacket(task, options = {}) {
   if (!task || !task.id || !task.title || !task.type) {
     throw new Error('buildTaskPacket: task must have id, title, and type');
+  }
+  if (!SKILL_MAP.hasOwnProperty(task.type)) {
+    const valid = Object.keys(SKILL_MAP).join(', ');
+    throw new Error(`buildTaskPacket: invalid task type "${task.type}" (valid: ${valid})`);
   }
 
   const sections = [];
@@ -263,52 +267,47 @@ function buildWavePlan(tasks) {
     return [];
   }
 
-  // Build adjacency: taskId → Set of dependency IDs
+  // Build lookup: taskId → task object, and pre-compute string deps
   const taskMap = new Map();
-  const inDegree = new Map();
-  const dependents = new Map(); // depId → [taskIds that depend on it]
+  const depsMap = new Map(); // taskId → string[] of dependency IDs
 
   for (const task of tasks) {
     const id = String(task.id);
     taskMap.set(id, task);
-    const deps = (task.dependsOn || []).map(String);
-    inDegree.set(id, deps.length);
-    for (const dep of deps) {
-      if (!dependents.has(dep)) dependents.set(dep, []);
-      dependents.get(dep).push(id);
-    }
+    depsMap.set(id, (task.dependsOn || []).map(String));
   }
 
-  // Ensure all task IDs exist in inDegree
-  for (const task of tasks) {
-    const id = String(task.id);
-    if (!inDegree.has(id)) inDegree.set(id, 0);
+  // Validate: all referenced dependencies must exist in the task list
+  for (const [id, deps] of depsMap) {
+    for (const dep of deps) {
+      if (!taskMap.has(dep)) {
+        throw new Error(
+          `Task "${id}" depends on "${dep}" which does not exist in the task list`,
+        );
+      }
+    }
   }
 
   const waves = [];
   const resolved = new Set();
-  let remaining = new Set(taskMap.keys());
+  const remaining = new Set(taskMap.keys());
 
   while (remaining.size > 0) {
     // Collect tasks whose dependencies are all resolved
     const ready = [];
     for (const id of remaining) {
-      const deps = (taskMap.get(id).dependsOn || []).map(String);
-      const allResolved = deps.every(d => resolved.has(d));
-      if (allResolved) {
+      if (depsMap.get(id).every(d => resolved.has(d))) {
         ready.push(id);
       }
     }
 
     if (ready.length === 0) {
-      // Remaining tasks have unmet dependencies → circular
       const stuck = Array.from(remaining).join(', ');
       throw new Error(`Circular dependency detected among tasks: ${stuck}`);
     }
 
     const waveNum = waves.length + 1;
-    const waveTasks = ready.map(id => taskMap.get(id));
-    waves.push({ wave: waveNum, tasks: waveTasks });
+    waves.push({ wave: waveNum, tasks: ready.map(id => taskMap.get(id)) });
 
     for (const id of ready) {
       resolved.add(id);
@@ -343,7 +342,8 @@ function formatWaveProgress(wavePlan, results) {
       const r = resultMap.get(id);
       const status = r ? r.status : 'pending';
       const commit = (r && r.commitHash) ? r.commitHash.slice(0, 7) : '';
-      lines.push(`| ${wave.wave} | ${task.title || id} | ${status} | ${commit} |`);
+      const safeTitle = (task.title || id).replace(/\|/g, '\\|');
+      lines.push(`| ${wave.wave} | ${safeTitle} | ${status} | ${commit} |`);
     }
   }
 
