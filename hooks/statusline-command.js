@@ -4,7 +4,7 @@
 // Reads .planning/ state for wave progress, context-metrics.json for enhanced context display
 
 const { execSync } = require("child_process");
-const { readFileSync, writeFileSync, statSync, existsSync, openSync, readSync, closeSync, readdirSync } = require("fs");
+const { readFileSync, writeFileSync, statSync, existsSync, openSync, readSync, closeSync } = require("fs");
 const { join } = require("path");
 
 let input = "";
@@ -23,9 +23,6 @@ process.stdin.on("end", () => {
   let cwd = data?.workspace?.current_dir || data?.cwd || process.cwd();
   let cwdUnix = cwd.replace(/\\/g, "/");
   const home = (process.env.HOME || process.env.USERPROFILE || "").replace(/\\/g, "/");
-  let cwdDisplay = cwdUnix;
-  if (home && cwdDisplay.startsWith(home)) cwdDisplay = "~" + cwdDisplay.slice(home.length);
-
   const model = data?.model?.display_name || process.env.CLAUDE_MODEL_NAME || "";
 
   // Git branch (symbolic-ref with short hash fallback)
@@ -156,7 +153,7 @@ process.stdin.on("end", () => {
         let activePhase = null;
         for (const line of roadmapLines) {
           const match = line.match(/^\|\s*(\d+)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*$/);
-          if (match && match[3].trim() !== "completed" && match[3].trim() !== "skipped") {
+          if (match && match[2].trim() !== "completed" && match[2].trim() !== "skipped") {
             activePhase = parseInt(match[1], 10);
             break;
           }
@@ -212,17 +209,13 @@ process.stdin.on("end", () => {
 
   // 256-color ANSI sequences
   const c = (n) => `\x1b[38;5;${n}m`;
-  const bg = (n) => `\x1b[48;5;${n}m`;
   const R = "\x1b[0m";
   const BOLD = "\x1b[1m";
-  const DIM = "\x1b[2m";
 
   // Palette
   const TEAL   = c(80);   // user@host
   const ROSE   = c(204);  // model
-  const AMBER  = c(215);  // path
   const MINT   = c(114);  // branch
-  const SKY    = c(117);  // ctx bar filled
   const SLATE  = c(239);  // ctx bar empty / separators
   const LILAC  = c(183);  // thinking
   const CORAL  = c(209);  // supabase
