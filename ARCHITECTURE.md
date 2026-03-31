@@ -50,6 +50,8 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `skills/supermind-init/architecture-template.md` | Skeleton template for ARCHITECTURE.md |
 | `skills/supermind-init/design-template.md` | Skeleton template for DESIGN.md |
 | `skills/supermind-living-docs/SKILL.md` | Manual sync trigger for ARCHITECTURE.md and DESIGN.md |
+| `skills/anti-rationalization/SKILL.md` | Blocks common LLM rationalizations for skipping steps — injected into all executors. Forked from obra/superpowers (MIT) |
+| `skills/verification-before-completion/SKILL.md` | Requires command output evidence before task completion — injected into all executors. Forked from obra/superpowers (MIT) |
 | `templates/CLAUDE.md` | Project CLAUDE.md template with infrastructure and placeholder sections |
 | `airis/mcp-config.json` | Direct-mode MCP server configuration (npx/uvx launch commands) |
 | `.env.example` | Environment variable template (TAVILY_API_KEY, TWENTYFIRST_API_KEY) |

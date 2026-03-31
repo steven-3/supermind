@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.0] - 2026-03-31
+
+### Added
+- **Anti-rationalization skill** (`skills/anti-rationalization/SKILL.md`): blocks common LLM rationalizations for skipping steps — injected into all executors via `SKILL_MAP`. Includes 8 rationalization/rebuttal pairs covering tests, verification, investigation, and config changes. Forked from obra/superpowers (MIT).
+- **Verification-before-completion skill** (`skills/verification-before-completion/SKILL.md`): requires command output evidence before any executor can report task completion. Defines what counts as verification (test output, compiler output, behavior demos) vs. what doesn't (assertions, beliefs, code reading). Includes mandatory completion report template. Forked from obra/superpowers (MIT).
+- Skill count: 5 directories (was 3)
+
 ## [3.6.0] - 2026-03-31
 
 ### Added
