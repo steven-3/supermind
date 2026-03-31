@@ -96,7 +96,8 @@ function checkSkills() {
   let expectedDirs;
   try {
     expectedDirs = getSkillDirs();
-  } catch {
+  } catch (err) {
+    logger.warn(`Could not enumerate skills from package: ${err.message}`);
     expectedDirs = [
       'supermind', 'quick', 'project', 'brainstorming', 'tdd',
       'systematic-debugging', 'anti-rationalization', 'verification-before-completion',
@@ -128,7 +129,8 @@ function checkAgents() {
   let expectedFiles;
   try {
     expectedFiles = getAgentFiles();
-  } catch {
+  } catch (err) {
+    logger.warn(`Could not enumerate agents from package: ${err.message}`);
     expectedFiles = ['code-reviewer.md'];
   }
 
@@ -152,7 +154,8 @@ function checkHooks() {
   let expectedFiles;
   try {
     expectedFiles = getHookFiles();
-  } catch {
+  } catch (err) {
+    logger.warn(`Could not enumerate hooks from package: ${err.message}`);
     expectedFiles = [
       'bash-permissions.js', 'session-start.js', 'session-end.js',
       'cost-tracker.js', 'statusline-command.js', 'context-monitor.js',
@@ -168,6 +171,15 @@ function checkHooks() {
 
   // Check registration in settings.json
   const settings = readSettings();
+  if (!settings || Object.keys(settings).length === 0) {
+    if (missingFiles.length > 0) {
+      fail(`Hooks — missing files: ${missingFiles.join(', ')}`);
+    } else {
+      ok(`${expectedFiles.length}/${expectedFiles.length} hooks installed`);
+    }
+    logger.warn('Hook registration check skipped — settings.json empty or unreadable');
+    return missingFiles.length === 0;
+  }
   const settingsJson = JSON.stringify(settings);
   const unregistered = [];
   for (const file of expectedFiles) {
