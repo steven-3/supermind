@@ -120,19 +120,6 @@ This entire lifecycle executes autonomously — no stopping to ask for permissio
 - The skill removes the worktree directory and deletes the temporary branch
 - Confirm the merge succeeded and the working tree is clean before reporting done
 
-## PR Review Workflow
-
-When a pull request is ready for review, invoke `/pr-review-toolkit:review-pr` to run an auto-fix loop:
-
-1. Launch all applicable review agents in parallel (code quality, inline comments, error handling, simplification)
-2. Aggregate findings into critical, important, and suggestions
-3. Fix everything found — for the first two rounds, address all findings including suggestions; after that, focus on critical and important only
-4. Re-run all review agents after fixes are applied
-5. Repeat until the review returns zero critical and important findings
-6. Report to the user: what was found and fixed each round, how many cycles it took, and any suggestions intentionally left as-is
-
-No approval needed at any step. The loop runs autonomously and delivers one final summary.
-
 ## Vendor Skills
 
 Supermind skills extend Claude Code with reusable, versioned behaviors. Skills live in `~/.claude/skills/` and are invoked with `/skill-name` during a session. Install and manage them with the `supermind` CLI:

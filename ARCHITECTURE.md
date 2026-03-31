@@ -81,7 +81,7 @@ Supermind is a unified skill engine for Claude Code — combining execution infr
 | `cli/lib/logger.js` | 38 | Color-coded terminal output: banner(), step(), success(), warn(), error(), info() |
 | `cli/lib/settings.js` | 144 | Settings I/O: readSettings(), writeSettings(), backupSettings(), mergeSettings(), removeSupermindEntries() |
 | `cli/lib/hooks.js` | 73 | Hook lifecycle: installHooks(), getHookSettings(), removeHooks() |
-| `cli/lib/skills.js` | 107 | Skill and agent lifecycle: installSkills(), removeSkills(), removeLegacySkills(), installAgents(), removeAgents() |
+| `cli/lib/skills.js` | 107 | Skill and agent lifecycle: installSkills(), removeSkills(), removeLegacySkills(), getSkillDirs(), installAgents(), removeAgents(), getAgentFiles() |
 | `cli/lib/templates.js` | 71 | Template lifecycle: installTemplates(), removeTemplates() |
 | `cli/lib/mcp.js` | 132 | MCP server setup: setupMcp(), promptApiKeys(), setupDocker(), setupDirect() |
 | `cli/lib/plugin.js` | 127 | Plugin lifecycle: installPlugin(), removePlugin(). Registers in ~/.claude/plugins/installed_plugins.json, manages cache |
@@ -114,7 +114,7 @@ Supermind is a unified skill engine for Claude Code — combining execution infr
 | `skills/verification-before-completion/SKILL.md` | 54 | All executors | Requires command output evidence before success claims. Forked from obra/superpowers (MIT) |
 | `skills/tdd/SKILL.md` | 179 | write-feature, write-test | Strict red-green-refactor. Forked from obra/superpowers (MIT) |
 | `skills/systematic-debugging/SKILL.md` | 129 | fix-bug | Four-phase root-cause debugging (REPRODUCE-ISOLATE-FIX-VERIFY). Forked from obra/superpowers (MIT) |
-| `skills/brainstorming/SKILL.md` | 165 | Orchestrator discuss | Design exploration with interactive and assumptions modes. Forked from obra/superpowers (MIT) |
+| `skills/brainstorming/SKILL.md` | 165 | Orchestrator discuss | Design exploration with interactive and assumptions modes. Forked from obra/superpowers (MIT), assumptions mode from gsd-build/get-shit-done (MIT) |
 | `skills/code-review/SKILL.md` | 144 | Verify phase | Six-criteria structured review, three-tier classification. Forked from obra/superpowers (MIT) |
 | `skills/writing-plans/SKILL.md` | 169 | Orchestrator plan | Atomic task plans with dependency graphs. Forked from obra/superpowers (MIT) |
 | `skills/executing-plans/SKILL.md` | 138 | Execute phase | Wave-based execution with progress tracking. Forked from obra/superpowers (MIT) |
@@ -131,6 +131,7 @@ Supermind is a unified skill engine for Claude Code — combining execution infr
 | `templates/CLAUDE.md` | 178 | Project CLAUDE.md template with infrastructure and placeholder sections |
 | `skills/supermind-init/architecture-template.md` | — | Skeleton template for ARCHITECTURE.md generation |
 | `skills/supermind-init/design-template.md` | — | Skeleton template for DESIGN.md generation |
+| `airis/docker-compose.yml` | — | AIRIS gateway Docker compose for MCP server management |
 | `airis/mcp-config.json` | — | Direct-mode MCP server configuration (npx/uvx launch commands) |
 | `.claude-plugin/plugin.json` | 21 | Plugin manifest — name, description, author, keywords. Version overridden from package.json on install |
 | `.env.example` | — | Environment variable template (TAVILY_API_KEY, TWENTYFIRST_API_KEY) |
