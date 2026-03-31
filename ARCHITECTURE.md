@@ -44,7 +44,7 @@ Supermind is a zero-dependency Node.js CLI (`supermind-claude`) that provides co
 | `hooks/cost-tracker.js` | Stop hook (async) — appends session cost estimate to ~/.claude/cost-log.jsonl |
 | `hooks/pre-merge-checklist.js` | PostToolUse hook — advisory pre-merge checks triggered on git merge Bash calls |
 | `hooks/improvement-logger.js` | Stop hook (async) — appends session improvement observations to ~/.claude/improvement-log.jsonl |
-| `hooks/statusline-command.js` | Status line renderer — shows user, host, git branch, context usage, agents, session cost. Also writes context metrics to ~/.claude/context-metrics.json for the context monitor |
+| `hooks/statusline-command.js` | Status line renderer — Line 1: user@host, model, branch, context bar (color-coded: green >50%, yellow 25-50%, red <25% remaining). Line 2: token counts, wave progress (from .planning/ when active), active executor count, session cost. Writes context metrics to ~/.claude/context-metrics.json for the context monitor |
 | `hooks/context-monitor.js` | PostToolUse hook — reads context metrics and injects advisory warnings at 35%/25% remaining thresholds. Tracks state in ~/.claude/context-monitor-state.json |
 | `skills/supermind/SKILL.md` | Complexity router — auto-detects task scope and routes to /quick or /project mode. Analyzes quick signals (fix, rename, single-file) vs project signals (build, implement, multi-file). Announces decision with escape hatch. Handles explicit overrides, .planning/ session resume, and non-task prompts |
 | `skills/supermind-init/SKILL.md` | Project onboarding: CLAUDE.md merge, ARCHITECTURE.md + DESIGN.md generation, health checks |

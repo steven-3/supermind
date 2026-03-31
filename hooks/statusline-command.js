@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Claude Code status line — sleek terminal aesthetic
-// Two-line display with box-drawing chars, context bar gradient, subagent tracking
+// Two-line display: identity + context bar, wave progress + executors + cost
+// Reads .planning/ state for wave progress, context-metrics.json for enhanced context display
 
 const { execSync } = require("child_process");
-const { readFileSync, writeFileSync, statSync, openSync, readSync, closeSync } = require("fs");
+const { readFileSync, writeFileSync, statSync, existsSync, openSync, readSync, closeSync, readdirSync } = require("fs");
 const { join } = require("path");
 
 let input = "";
@@ -28,6 +29,9 @@ process.stdin.on("end", () => {
   const model = data?.model?.display_name || process.env.CLAUDE_MODEL_NAME || "";
 
   // Git branch (symbolic-ref with short hash fallback)
+  // Note: execSync is used here with hardcoded commands only (no user input),
+  // so shell injection is not a concern. This is a status line hook with no
+  // interactive input — all values come from process.env or the Claude Code data pipe.
   let gitBranch = "";
   try {
     gitBranch = execSync("git symbolic-ref --short HEAD", {
@@ -124,10 +128,11 @@ process.stdin.on("end", () => {
 
   // ─── Write context metrics for context-monitor hook ─────────────────────
 
+  let percentRemaining = null;
   if (usedPct != null && windowSize) {
+    percentRemaining = Math.round((100 - usedPct) * 10) / 10;
     try {
       const metricsPath = join(process.env.HOME || process.env.USERPROFILE, ".claude", "context-metrics.json");
-      const percentRemaining = Math.round((100 - usedPct) * 10) / 10;
       writeFileSync(metricsPath, JSON.stringify({
         percentRemaining,
         tokensUsed: usedTokens || 0,
@@ -136,6 +141,62 @@ process.stdin.on("end", () => {
       }));
     } catch {}
   }
+
+  // ─── Wave progress (from .planning/) ────────────────────────────────────
+
+  let waveProgress = null;
+  try {
+    const planningDir = join(cwdUnix, ".planning");
+    if (existsSync(planningDir)) {
+      // Find active phase from roadmap.md
+      const roadmapPath = join(planningDir, "roadmap.md");
+      if (existsSync(roadmapPath)) {
+        const roadmapContent = readFileSync(roadmapPath, "utf8");
+        const roadmapLines = roadmapContent.split("\n");
+        let activePhase = null;
+        for (const line of roadmapLines) {
+          const match = line.match(/^\|\s*(\d+)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*$/);
+          if (match && match[3].trim() !== "completed" && match[3].trim() !== "skipped") {
+            activePhase = parseInt(match[1], 10);
+            break;
+          }
+        }
+
+        if (activePhase != null) {
+          const progressPath = join(planningDir, "phases", `phase-${activePhase}`, "progress.md");
+          if (existsSync(progressPath)) {
+            const progressContent = readFileSync(progressPath, "utf8");
+            const entries = [];
+            for (const line of progressContent.split("\n")) {
+              const match = line.match(/^\|\s*(\d+)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*$/);
+              if (match) {
+                entries.push({
+                  wave: parseInt(match[1], 10),
+                  status: match[3].trim(),
+                });
+              }
+            }
+
+            if (entries.length > 0) {
+              const totalTasks = entries.length;
+              const doneTasks = entries.filter(e => e.status === "completed").length;
+              const maxWave = Math.max(...entries.map(e => e.wave));
+              // Use the lowest incomplete wave as "current"
+              const incompleteWaves = entries.filter(e => e.status !== "completed").map(e => e.wave);
+              const currentWave = incompleteWaves.length > 0 ? Math.min(...incompleteWaves) : maxWave;
+
+              waveProgress = {
+                currentWave,
+                totalWaves: maxWave,
+                doneTasks,
+                totalTasks,
+              };
+            }
+          }
+        }
+      }
+    }
+  } catch {}
 
   // ─── Helpers ────────────────────────────────────────────────────────────
 
@@ -168,20 +229,24 @@ process.stdin.on("end", () => {
   const GRAY   = c(245);  // labels
   const WHITE  = c(255);  // bright text
   const DKGRAY = c(237);  // box chars
+  const GREEN  = c(114);  // context bar >50% remaining
+  const YELLOW = c(220);  // context bar 25-50% remaining
+  const RED    = c(196);  // context bar <25% remaining
 
-  // ─── Progress bar (teal -> sky -> rose gradient at 75%) ─────────────────
+  // ─── Context bar (color-coded by remaining capacity) ────────────────────
 
-  function progressBar(pct, width = 20) {
-    const filled = Math.round((pct / 100) * width);
+  function contextBar(usedPercent, width = 10) {
+    const filled = Math.round((usedPercent / 100) * width);
     const empty = width - filled;
-    // Gradient: low=teal, mid=sky, high=rose
-    let barColor = SKY;
-    if (pct > 75) barColor = c(204);
-    else if (pct > 50) barColor = c(220);
+    const remaining = 100 - usedPercent;
 
-    const filledStr = barColor + "\u2501".repeat(filled);
-    const emptyStr = SLATE + "\u2501".repeat(empty);
-    return filledStr + emptyStr + R;
+    // Color by remaining capacity: green >50%, yellow 25-50%, red <25%
+    let barColor;
+    if (remaining > 50) barColor = GREEN;
+    else if (remaining >= 25) barColor = YELLOW;
+    else barColor = RED;
+
+    return `${SLATE}[${R}${barColor}${"\u2588".repeat(filled)}${SLATE}${"\u2591".repeat(empty)}${R}${SLATE}]${R}`;
   }
 
   // ─── Separators ─────────────────────────────────────────────────────────
@@ -189,24 +254,44 @@ process.stdin.on("end", () => {
   const SEP = `${DKGRAY}  \u2502  ${R}`;
   const DOT = `${DKGRAY} \u00b7 ${R}`;
 
-  // ─── Line 1: identity + location ────────────────────────────────────────
+  // ─── Line 1: identity + branch + context bar ───────────────────────────
 
   let line1 = `${DKGRAY}\u256d${R} `;
   line1 += `${TEAL}${BOLD}${user}${R}${GRAY}@${R}${TEAL}${host}${R}`;
   if (model) line1 += `${SEP}${ROSE}${model}${R}`;
-  line1 += `${SEP}${AMBER}${cwdDisplay}${R}`;
-  if (gitBranch) line1 += `${DOT}${MINT}${BOLD}${gitBranch}${R}`;
+  if (gitBranch) line1 += `${SEP}${MINT}${BOLD}${gitBranch}${R}`;
 
-  // ─── Line 2: metrics ───────────────────────────────────────────────────
+  if (usedPct != null) {
+    const pct = Math.round(usedPct);
+    const remaining = 100 - pct;
+    const bar = contextBar(pct);
+
+    // Color the percentage by remaining capacity
+    let pctColor;
+    if (remaining > 50) pctColor = GREEN;
+    else if (remaining >= 25) pctColor = YELLOW;
+    else pctColor = RED;
+
+    line1 += `${SEP}${bar} ${pctColor}${BOLD}${pct}%${R}`;
+  }
+
+  // ─── Line 2: wave progress + executors + cost ──────────────────────────
 
   let line2 = `${DKGRAY}\u2570${R} `;
   const parts2 = [];
 
-  if (usedPct != null) {
-    const pct = Math.round(usedPct);
-    const bar = progressBar(pct);
+  // Token counts (compact)
+  if (usedTokens != null && windowSize) {
     parts2.push(
-      `${bar} ${WHITE}${BOLD}${pct}%${R}${GRAY} ctx${R}${DOT}${WHITE}${fmt(usedTokens)}${R}${GRAY}/${R}${WHITE}${fmt(windowSize)}${R}`,
+      `${WHITE}${fmt(usedTokens)}${R}${GRAY}/${R}${WHITE}${fmt(windowSize)}${R}${GRAY} tokens${R}`,
+    );
+  }
+
+  // Wave progress (only when .planning/ has active progress)
+  if (waveProgress) {
+    const VIOLET = c(141);
+    parts2.push(
+      `${VIOLET}\u25b8 Wave ${waveProgress.currentWave}/${waveProgress.totalWaves}${R}${DOT}${WHITE}${waveProgress.doneTasks}/${waveProgress.totalTasks}${R}${GRAY} tasks${R}`,
     );
   }
 
@@ -219,6 +304,7 @@ process.stdin.on("end", () => {
     parts2.push(`${CORAL}\u25c8 ${R}${GRAY}sb:${R}${CORAL}${supabaseRef}${R}`);
   }
 
+  // Active executors / agents
   if (activeAgents.length) {
     const CYAN = c(81);
     const names = activeAgents
@@ -229,7 +315,7 @@ process.stdin.on("end", () => {
         Math.floor(Date.now() / 100) % 10
       ];
     parts2.push(
-      `${CYAN}${spinner} ${activeAgents.length} agent${activeAgents.length > 1 ? "s" : ""}${R}${GRAY}: ${names}${R}`,
+      `${CYAN}${spinner} ${activeAgents.length} executor${activeAgents.length > 1 ? "s" : ""}${R}${GRAY}: ${names}${R}`,
     );
   }
 

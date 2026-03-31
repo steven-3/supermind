@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.18.0] - 2026-03-31
+
+### Changed
+- **Enhanced statusline** (`hooks/statusline-command.js`): redesigned two-line layout with three new indicators
+  - **Context usage bar**: compact `[████████░░]` visual indicator alongside percentage, color-coded by remaining capacity — green (>50%), yellow (25-50%), red (<25%). Reads from `~/.claude/context-metrics.json` (written by the same hook for the context monitor). Moved from line 2 to line 1 alongside identity and branch.
+  - **Wave progress**: when Project Mode is active with `.planning/` state, displays `▸ Wave 2/4 · 3/5 tasks` showing current wave, total waves, and task completion. Parses `roadmap.md` for active phase and `progress.md` for task entries. Only displayed when `.planning/` exists with active progress.
+  - **Active executor count**: subagent display renamed from "agents" to "executors" to match v4 terminology. Shows `⠛ 2 executors: desc1, desc2` with braille spinner.
+  - **Revised line layout**: Line 1 = user@host | model | branch | context bar. Line 2 = token counts | wave progress | executors | cost. Path moved off line 1 to make room for context bar.
+  - All new indicators degrade gracefully: no `.planning/` → no wave progress, no context data → no bar, no executors → no count.
+  - Sub-project 5.2 of Supermind v4 Unified Engine design.
+
 ## [3.17.0] - 2026-03-31
 
 ### Added
