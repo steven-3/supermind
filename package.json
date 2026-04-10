@@ -1,6 +1,6 @@
 {
   "name": "supermind-claude",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Unified skill engine for Claude Code — execution infrastructure meets behavioral discipline",
   "bin": {
     "supermind-claude": "cli/index.js",

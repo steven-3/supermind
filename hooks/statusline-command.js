@@ -219,6 +219,7 @@ process.stdin.on("end", () => {
   const SLATE  = c(239);  // ctx bar empty / separators
   const LILAC  = c(183);  // thinking
   const CORAL  = c(209);  // supabase
+  const ORANGE = c(214);  // folder name
   const GRAY   = c(245);  // labels
   const WHITE  = c(255);  // bright text
   const DKGRAY = c(237);  // box chars
@@ -254,29 +255,20 @@ process.stdin.on("end", () => {
   if (model) line1 += `${SEP}${ROSE}${model}${R}`;
   if (gitBranch) line1 += `${SEP}${MINT}${BOLD}${gitBranch}${R}`;
 
-  if (usedPct != null) {
-    const pct = Math.round(usedPct);
-    const remaining = 100 - pct;
-    const bar = contextBar(pct);
-
-    // Color the percentage by remaining capacity
-    let pctColor;
-    if (remaining > 50) pctColor = GREEN;
-    else if (remaining >= 25) pctColor = YELLOW;
-    else pctColor = RED;
-
-    line1 += `${SEP}${bar} ${pctColor}${BOLD}${pct}%${R}`;
-  }
+  // Folder name (basename of cwd)
+  const folderName = cwdUnix.split("/").filter(Boolean).pop() || "";
+  if (folderName) line1 += `${SEP}${ORANGE}${BOLD}${folderName}${R}`;
 
   // ─── Line 2: wave progress + executors + cost ──────────────────────────
 
   let line2 = `${DKGRAY}\u2570${R} `;
   const parts2 = [];
 
-  // Token counts (compact)
+  // Context bar + token counts (compact)
   if (usedTokens != null && windowSize) {
+    const barPrefix = usedPct != null ? `${contextBar(Math.round(usedPct))} ` : "";
     parts2.push(
-      `${WHITE}${fmt(usedTokens)}${R}${GRAY}/${R}${WHITE}${fmt(windowSize)}${R}${GRAY} tokens${R}`,
+      `${barPrefix}${WHITE}${fmt(usedTokens)}${R}${GRAY}/${R}${WHITE}${fmt(windowSize)}${R}${GRAY} tokens${R}`,
     );
   }
 

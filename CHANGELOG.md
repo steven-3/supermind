@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.2] - 2026-04-10
+
+### Changed
+- Statusline: moved context usage bar from line 1 to line 2 (left of token count), removed percentage counter
+- Statusline: added current folder name in orange to line 1 (where context bar was)
+- Added `ORANGE` color constant to statusline palette
+
 ## [4.0.1] - 2026-03-31
 
 ### Fixed
